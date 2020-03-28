@@ -1,0 +1,36 @@
+.hand-container {
+	width: 100%;
+	position: absolute;
+	bottom: 0px;
+}
+
+.hand {
+	font-family: sans-serif;
+	padding-left: calc(50% - 75px);
+	padding-top: 20px;
+	width: 100%;
+	height: 250px;
+	position: relative;
+	overflow-y: hidden;
+}
+
+.arch-wrapper {
+	position: relative;
+}
+
+.hand app-card {
+	position: absolute;
+	border: solid 1px black;
+	border-radius: 5px;
+	margin-top: 20px;
+	top: 0px;
+	transition: margin-top .4s ease-in-out;
+}
+
+.hand app-card:hover {
+	margin-top: 0px;
+}
+
+.hand app-card.active {
+	z-index: 1;
+}

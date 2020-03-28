@@ -1,0 +1,24 @@
+<div 
+	[ngClass]="{
+		card: true,
+		blue: card.color === 'blue',
+		red: card.color === 'red',
+		clicked: !!active
+	}"
+	(click)="!active && onClickCard()"
+	>
+	<div class="corners">
+		<div class="corner topLeft">{{ card.symbol }}</div>
+		<div class="corner topRight">{{ card.symbol }}</div>
+		<div class="corner bottomLeft">{{ card.symbol }}</div>
+		<div class="corner bottomRight">{{ card.symbol }}</div>
+	</div>
+	<div class="center">
+		<div class="centerNumber">{{ card.symbol }}</div>
+	</div>
+	<div *ngIf="active === true" class="controls">
+		<button (click)="onClickPlay($event)">Play</button>
+		<button (click)="onClickDiscard($event)">Discard</button>
+		<button (click)="onClickCancel($event)" class="cancelButton">Cancel</button>
+	</div>
+</div>

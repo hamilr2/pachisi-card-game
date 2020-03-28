@@ -1,0 +1,19 @@
+<div class="hand-container">
+	<div class="hand-controls">
+		<button
+			(click)="onClickDrawNewHand()"
+		>Draw New Hand</button>
+	</div>
+	<div class="hand">
+		<div class="arch-wrapper">
+			<app-card 
+				*ngFor="let card of builtHand" [card]="card.card"
+				(onDiscardCard)="onCardDiscardCard($event)"
+				(onPlayCard)="onCardPlayCard($event)"
+				(onActiveChange)="onCardActiveChange($event)"
+				[ngClass]="{active: card.active}"
+				[ngStyle]="{left: '' + card.left + 'px', transform: 'rotate(' + card.rotation + 'deg)', top: '' + card.top + 'px'}"
+			></app-card>
+		</div>
+	</div>
+</div>
