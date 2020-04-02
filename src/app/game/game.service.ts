@@ -1,4 +1,6 @@
 import { Card } from './card.model';
+import { Injectable } from '@angular/core';
+import { StorageService } from '../storage.service';
 
 const shuffle = (items: Array<any>) => {
 	return items.map(item => {
@@ -14,15 +16,16 @@ const shuffle = (items: Array<any>) => {
 const HAND_SIZE = 6;
 const DEFAULT_CARD_QUANTITY = 8;
 
+@Injectable()
+
 export class GameService {
 
-	deck = [];
-	discard = [];
-	hand = [];
-
-	hasDiscarded = false;
-	round = 1;
-	turn = 1;
+	deck: Card[];
+	discard: Card[];
+	hand: Card[];
+	hasDiscarded: boolean;
+	round: number;
+	turn: number;
 
 	deal() {
 		if (this.deck.length === 0) {
@@ -35,11 +38,15 @@ export class GameService {
 		}
 	}
 
-	advanceRound() {
+	public advanceRound() {
+		if (this.hand.length > 0) {
+			this.discard = [...this.discard, ...this.hand];
+		}
 		this.round++;
 		this.hasDiscarded = false;
 		this.turn = 1;
 		this.deal();
+		this.save();
 	}
 
 	advanceTurn() {
@@ -49,22 +56,36 @@ export class GameService {
 		}
 		this.turn++;
 		this.hasDiscarded = false;
+		this.save();
 	}
 
-	constructor() {
+	constructor(private storage: StorageService) {
+		const loadedGame = storage.loadGame();
+		if (loadedGame === false) {
+			this.newGame();
+		} else {
+			Object.assign(this, loadedGame);
+		}
+	}
+
+	newGame() {
+		this.discard = [];
+		this.hasDiscarded = false;
+		this.round = 1;
+		this.turn = 1;
+
 		this.buildDeck();
 		this.deck = shuffle(this.deck);
 		this.deal();
+		this.save();
+	}
+
+	save() {
+		this.storage.saveGame(this);
 	}
 
 	getHandSizeForRound() {
 		return HAND_SIZE - ((this.round - 1) % 5);
-	}
-
-	public drawNewHand(): void {
-		this.discard = [...this.discard, ...this.hand];
-		this.round++;
-		this.deal();
 	}
 
 	public playCard(card: Card): void {
@@ -81,6 +102,7 @@ export class GameService {
 		} else {
 			this.hasDiscarded = true;
 			this.hand.push(this.deck.shift());
+			this.save();
 		}
 	}
 

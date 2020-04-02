@@ -1,16 +1,16 @@
 <div class="hand-container">
 	<div class="hand-controls">
 		<button
-			(click)="game.drawNewHand()"
-		>Draw New Hand</button>
+			(click)="game.advanceRound()"
+		>Advance Round</button>
 	</div>
 	<div class="hand">
 		<div class="arch-wrapper">
 			<app-card 
 				*ngFor="let card of builtHand" [card]="card.card"
-				(onDiscardCard)="onCardDiscardCard($event)"
-				(onPlayCard)="onCardPlayCard($event)"
-				(onActiveChange)="onCardActiveChange($event)"
+				(discardCard)="onCardDiscardCard($event)"
+				(playCard)="onCardPlayCard($event)"
+				(activeChange)="onCardActiveChange($event)"
 				[ngClass]="{active: card.active}"
 				[ngStyle]="{left: '' + card.left + 'px', transform: 'rotate(' + card.rotation + 'deg)', top: '' + card.top + 'px'}"
 			></app-card>

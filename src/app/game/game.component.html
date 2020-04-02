@@ -1,3 +1,4 @@
+<button (click)="game.newGame()">New Game</button>
 <div>Round {{game.round}}, turn {{game.turn}}, cards left in deck: {{ game.deck.length }}, cards in discard: {{ game.discard.length }}</div>
 <app-hand 
 	[game]="game"
