@@ -1,6 +1,8 @@
 import { Card } from './card.model';
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage.service';
+import { Space } from './space.model';
+import { Player } from './player.model';
 
 const shuffle = (items: Array<any>) => {
 	return items.map(item => {
@@ -23,6 +25,10 @@ export class GameService {
 	deck: Card[];
 	discard: Card[];
 	hand: Card[];
+	boardSpaces: Space[];
+	players: Player[];
+	player: Player;
+
 	hasDiscarded: boolean;
 	round: number;
 	turn: number;
@@ -65,6 +71,7 @@ export class GameService {
 			this.newGame();
 		} else {
 			Object.assign(this, loadedGame);
+			this.buildBoardSpaces();
 		}
 	}
 
@@ -73,6 +80,9 @@ export class GameService {
 		this.hasDiscarded = false;
 		this.round = 1;
 		this.turn = 1;
+
+		this.buildPlayers();
+		this.buildBoardSpaces();
 
 		this.buildDeck();
 		this.deck = shuffle(this.deck);
@@ -88,10 +98,31 @@ export class GameService {
 		return HAND_SIZE - ((this.round - 1) % 5);
 	}
 
-	public playCard(card: Card): void {
-		this.hand = this.hand.filter((thisCard: Card) => thisCard !== card);
-		this.discard.push(card);
-		this.advanceTurn();
+	public playCard(card: Card): boolean {
+
+		let errorMessage = '';
+
+		if (card.startable) {
+			if (this.player.home.length > 0) {
+				if (!this.player.spaces[0].piece) {
+					this.player.spaces[0].piece = this.player.home.shift();
+				} else {
+					errorMessage = 'Home space is already occupied!';
+				}
+			} else {
+				errorMessage = 'No pieces left in home!';
+			}
+		}
+
+		if (errorMessage) {
+			alert(errorMessage);
+			return false;
+		} else {
+			this.hand = this.hand.filter((thisCard: Card) => thisCard !== card);
+			this.discard.push(card);
+			this.advanceTurn();
+			return true;
+		}
 	}
 
 	public discardCard(card: Card): void {
@@ -106,12 +137,25 @@ export class GameService {
 		}
 	}
 
+	buildPlayers(numberOfPlayers: number = 4) {
+		this.players = [];
+		const colors = ['red', 'green', 'blue', 'yellow', 'orange', 'purple'];
+		for (let i = 0; i < numberOfPlayers; i++) {
+			this.players.push(new Player({
+				color: colors[i],
+				id: i
+			}));
+		}
+		this.player = this.players[0];
+	}
+
 	buildDeck() {
 		const cards = [
 			{
 				symbol: '?',
 				color: 'red',
 				quantity: 6,
+				startable: true
 			},
 			{
 				symbol: 'S',
@@ -119,7 +163,8 @@ export class GameService {
 			},
 			{
 				symbol: '1/11',
-				color: 'red'
+				color: 'red',
+				startable: true
 			},
 			{ symbol: '2' },
 			{ symbol: '3' },
@@ -137,12 +182,23 @@ export class GameService {
 			{ symbol: '9' },
 			{ symbol: '10' },
 			{ symbol: '12' },
-			{ symbol: '13' }
+			{
+				symbol: '13',
+				color: 'red',
+				startable: true
+			}
 		];
 
 		this.deck = cards.reduce((deck, card) => {
 			deck = [...deck, ...Array(card.quantity || DEFAULT_CARD_QUANTITY).fill({}).map(() => new Card(card))];
 			return deck;
 		}, []);
+	}
+
+	buildBoardSpaces() {
+		this.boardSpaces = [];
+		this.players.forEach((player: Player) => {
+			this.boardSpaces.push(...player.spaces);
+		});
 	}
 }

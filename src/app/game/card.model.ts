@@ -1,11 +1,16 @@
 
+interface CardOptions {
+	color?: string;
+	symbol: string;
+	startable?: boolean;
+}
 
 export class Card {
 	symbol: string;
-	color: string;
+	color = 'blue';
+	startable = false;
 
-	constructor({symbol, color = 'blue'}: {symbol: string, color?: string}) {
-		this.symbol = symbol;
-		this.color = color;
+	constructor(options: CardOptions) {
+		Object.assign(this, options);
 	}
 }

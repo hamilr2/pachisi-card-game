@@ -7,6 +7,10 @@ import { CardComponent } from './game/card/card.component';
 import { HandComponent } from './game/hand/hand.component';
 import { GameComponent } from './game/game.component';
 import { SplashScreenComponent } from './splash-screen/splash-screen.component';
+import { BoardComponent } from './game/board/board.component';
+import { SpaceComponent } from './game/board/space/space.component';
+import { HomeComponent } from './game/board/home/home.component';
+import { GoalComponent } from './game/board/goal/goal.component';
 
 
 const routes: Routes = [
@@ -31,7 +35,11 @@ const routes: Routes = [
 		CardComponent,
 		HandComponent,
 		GameComponent,
-		SplashScreenComponent
+		SplashScreenComponent,
+		BoardComponent,
+		SpaceComponent,
+		HomeComponent,
+		GoalComponent
 	],
 	imports: [
 		BrowserModule,

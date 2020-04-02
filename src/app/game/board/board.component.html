@@ -1,0 +1,9 @@
+<div class="board">
+	<div class="spaceRow" *ngFor="let player of game.players">
+		<app-space *ngFor="let space of player.spaces" [space]="space"></app-space>
+	</div>
+	<div class="playerRow" *ngFor="let player of game.players">
+		<app-home [player]="player"></app-home>
+		<app-goal [player]="player"></app-goal>
+	</div>
+</div>

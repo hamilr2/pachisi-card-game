@@ -1,0 +1,19 @@
+.outer {
+	border: solid 1px;
+	width: 20px;
+	height: 20px;
+	border-radius: 10px;
+}
+
+.outer:not(.start):not(.goal) {
+	background-color: initial !important;
+}
+
+.piece {
+	border: solid 1px black;
+	margin: 2px;
+	width: 16px;
+	height: 16px;
+	border-radius: 8px;
+	box-sizing: border-box;
+}

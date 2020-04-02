@@ -1,0 +1,19 @@
+<div class="outer"
+	[ngClass]="{
+		outer: true,
+		start: space.isStart,
+		goal: space.isGoal
+	}"
+	[ngStyle]="{
+		'border-color': space.player.color,
+		'background-color': space.player.color
+	}"
+>
+	<div
+		class="piece"
+		*ngIf="space.piece"
+		[ngStyle]="{
+			'background-color': space.player.color
+		}"
+	></div>
+</div>
