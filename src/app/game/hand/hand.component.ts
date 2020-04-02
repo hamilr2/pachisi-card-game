@@ -1,5 +1,6 @@
 import { Component, EventEmitter, OnInit, Input, Output, SimpleChanges, OnChanges } from '@angular/core';
 import { Card } from '../card.model';
+import { GameService } from '../game.service';
 
 @Component({
 	selector: 'app-hand',
@@ -7,23 +8,17 @@ import { Card } from '../card.model';
 	styleUrls: ['./hand.component.css']
 })
 export class HandComponent implements OnInit, OnChanges {
+	@Input() game: GameService;
 	@Input() cards: Card[];
-	@Output() onDrawNewHand = new EventEmitter();
-	@Output() onPlayCard = new EventEmitter<Card>();
-	@Output() onDiscardCard = new EventEmitter<Card>();
 
 	builtHand = [];
 
-	onClickDrawNewHand() {
-		this.onDrawNewHand.emit();
-	}
-
 	onCardPlayCard(card: Card) {
-		this.onPlayCard.emit(card);
+		this.game.playCard(card);
 	}
 
 	onCardDiscardCard(card: Card){
-		this.onDiscardCard.emit(card);
+		this.game.discardCard(card);
 	}
 
 	onCardActiveChange({card, active}: {card: Card, active: boolean}) {

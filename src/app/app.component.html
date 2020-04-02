@@ -1,8 +1,1 @@
-<div>Round {{round}}, turn {{turn}}, cards left in deck: {{ deck.length }}, cards in discard: {{ discard.length }}</div>
-<app-hand 
-  [cards]="hand"
-  (onDrawNewHand)="onDrawNewHand()"
-  (onDiscardCard)="onDiscardCard($event)"
-  (onPlayCard)="onPlayCard($event)"
->
-</app-hand>
+<router-outlet></router-outlet>

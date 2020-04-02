@@ -25,6 +25,11 @@
       true,
       "rxjs/Rx"
     ],
+    "indent": [
+      true,
+      "tabs",
+      2
+    ],
     "interface-name": false,
     "max-classes-per-file": false,
     "max-line-length": [
