@@ -10,34 +10,34 @@ import { SplashScreenComponent } from './splash-screen/splash-screen.component';
 
 
 const routes: Routes = [
-  {
-    path: '',
-    component: SplashScreenComponent,
-    pathMatch: 'full'
-  },
-  {
-    path: 'game',
-    component: GameComponent
-  },
-  {
-    path: '**',
-    redirectTo: '/'
-  }
-]
+	{
+		path: '',
+		component: SplashScreenComponent,
+		pathMatch: 'full'
+	},
+	{
+		path: 'game',
+		component: GameComponent
+	},
+	{
+		path: '**',
+		redirectTo: '/'
+	}
+];
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    CardComponent,
-    HandComponent,
-    GameComponent,
-    SplashScreenComponent
-  ],
-  imports: [
-    BrowserModule,
-    RouterModule.forRoot(routes)
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+	declarations: [
+		AppComponent,
+		CardComponent,
+		HandComponent,
+		GameComponent,
+		SplashScreenComponent
+	],
+	imports: [
+		BrowserModule,
+		RouterModule.forRoot(routes)
+	],
+	providers: [],
+	bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -9,31 +9,31 @@ import { Card } from '../card.model';
 
 export class CardComponent implements OnInit {
 	@Input() card: Card;
-	@Output() onActiveChange = new EventEmitter<{card: Card, active: boolean}>();
-	@Output() onPlayCard = new EventEmitter<Card>();
-	@Output() onDiscardCard = new EventEmitter<Card>();
+	@Output() activeChange = new EventEmitter<{card: Card, active: boolean}>();
+	@Output() playCard = new EventEmitter<Card>();
+	@Output() discardCard = new EventEmitter<Card>();
 
-	active: boolean = false;
+	active = false;
 
 	onClickCard() {
 		this.active = !this.active;
-		this.onActiveChange.emit({card: this.card, active: this.active});
+		this.activeChange.emit({card: this.card, active: this.active});
 	}
 
 	onClickCancel(e: Event) {
 		e.stopPropagation();
 		this.active = false;
-		this.onActiveChange.emit({card: this.card, active: this.active});
-	};
+		this.activeChange.emit({card: this.card, active: this.active});
+	}
 
 	onClickPlay(e: Event) {
 		e.stopPropagation();
-		this.onPlayCard.emit(this.card);
+		this.playCard.emit(this.card);
 	}
 
 	onClickDiscard(e: Event) {
 		e.stopPropagation();
-		this.onDiscardCard.emit(this.card);
+		this.discardCard.emit(this.card);
 	}
 
 	constructor() {

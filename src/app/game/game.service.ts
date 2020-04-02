@@ -5,9 +5,9 @@ const shuffle = (items: Array<any>) => {
 		return {
 			value: item,
 			rand: Math.random()
-		}
+		};
 	}).sort(({rand: randA}, { rand: randB}) => {
-		return randA-randB;
+		return randA - randB;
 	}).map(({value}) => value );
 };
 
@@ -19,20 +19,20 @@ export class GameService {
 	deck = [];
 	discard = [];
 	hand = [];
-	
+
 	hasDiscarded = false;
 	round = 1;
 	turn = 1;
 
 	deal() {
-		if (this.deck.length == 0) {
+		if (this.deck.length === 0) {
 			alert('Deck is empty!');
 			return false;
 		}
 		this.hand = [];
 		for (let i = 0; i < this.getHandSizeForRound() && this.deck.length > 0; i++) {
 			this.hand.push(this.deck.shift());
-		};
+		}
 	}
 
 	advanceRound() {
@@ -91,7 +91,7 @@ export class GameService {
 				color: 'red',
 				quantity: 6,
 			},
-			{ 
+			{
 				symbol: 'S',
 				color: 'red',
 			},
@@ -107,7 +107,7 @@ export class GameService {
 			},
 			{ symbol: '5' },
 			{ symbol: '6' },
-			{ 
+			{
 				symbol: '7',
 				color: 'red'
 			},

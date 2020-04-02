@@ -17,7 +17,7 @@ export class HandComponent implements OnInit, OnChanges {
 		this.game.playCard(card);
 	}
 
-	onCardDiscardCard(card: Card){
+	onCardDiscardCard(card: Card) {
 		this.game.discardCard(card);
 	}
 
@@ -31,9 +31,9 @@ export class HandComponent implements OnInit, OnChanges {
 		const HORIZONTAL_SPACING = 40;
 		const VERTICAL_SPACING = 5;
 
-		const startingRotation = (this.cards.length-1) / 2 * ROTATION_INTERVAL * - 1;
-		const startingLeft = (this.cards.length-1) / 2 * HORIZONTAL_SPACING * - 1;
-		const startingTop = (this.cards.length-1) / 2 * VERTICAL_SPACING * -1;
+		const startingRotation = (this.cards.length - 1) / 2 * ROTATION_INTERVAL * - 1;
+		const startingLeft = (this.cards.length - 1) / 2 * HORIZONTAL_SPACING * - 1;
+		const startingTop = (this.cards.length - 1) / 2 * VERTICAL_SPACING * -1;
 
 		this.builtHand = this.cards.map((card: Card, index) => {
 			return {
@@ -42,8 +42,8 @@ export class HandComponent implements OnInit, OnChanges {
 				left: startingLeft + index * HORIZONTAL_SPACING,
 				top: startingTop + index * VERTICAL_SPACING,
 				active: false
-			}
-		})
+			};
+		});
 	}
 
 	constructor() { }
