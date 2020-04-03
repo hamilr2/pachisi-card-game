@@ -1,5 +1,5 @@
-// import { Space } from './space.model';
 import { Player } from './player.model';
+import { Space } from './space.model';
 
 interface PieceOptions {
 	color: string;
@@ -8,7 +8,7 @@ interface PieceOptions {
 
 export class Piece {
 	color: string;
-	// location: Space;
+	space: Space;
 	player: Player;
 
 	constructor(options: PieceOptions) {

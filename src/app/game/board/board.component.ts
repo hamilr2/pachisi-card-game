@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { GameService } from '../game.service';
+import { InterfaceService } from '../interface.service';
 
 @Component({
 	selector: 'app-board',

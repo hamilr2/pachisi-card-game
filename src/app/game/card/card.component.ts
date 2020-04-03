@@ -1,5 +1,7 @@
 import { Component, EventEmitter, OnInit, Input, Output } from '@angular/core';
 import { Card } from '../card.model';
+import { GameService } from '../game.service';
+import { InterfaceService } from '../interface.service';
 
 @Component({
 	selector: 'app-card',
@@ -14,6 +16,12 @@ export class CardComponent implements OnInit {
 	@Output() discardCard = new EventEmitter<Card>();
 
 	active = false;
+
+	constructor(private game: GameService, public interfaceService: InterfaceService) { }
+
+	isPlayable() {
+		return !!this.game.getMovablePiecesForCard(this.card).movablePieces.length;
+	}
 
 	onClickCard() {
 		this.active = !this.active;
@@ -34,9 +42,6 @@ export class CardComponent implements OnInit {
 	onClickDiscard(e: Event) {
 		e.stopPropagation();
 		this.discardCard.emit(this.card);
-	}
-
-	constructor() {
 	}
 
 	ngOnInit(): void { }

@@ -1,6 +1,7 @@
 import { Component, EventEmitter, OnInit, Input, Output, SimpleChanges, OnChanges } from '@angular/core';
 import { Card } from '../card.model';
 import { GameService } from '../game.service';
+import { InterfaceService } from '../interface.service';
 
 @Component({
 	selector: 'app-hand',
@@ -10,11 +11,14 @@ import { GameService } from '../game.service';
 export class HandComponent implements OnInit, OnChanges {
 	@Input() game: GameService;
 	@Input() cards: Card[];
+	@Input() interfaceService: InterfaceService;
 
 	builtHand = [];
 
+	constructor() { }
+
 	onCardPlayCard(card: Card) {
-		this.game.playCard(card);
+		this.interfaceService.attemptPlayCard(card);
 	}
 
 	onCardDiscardCard(card: Card) {
@@ -45,8 +49,6 @@ export class HandComponent implements OnInit, OnChanges {
 			};
 		});
 	}
-
-	constructor() { }
 
 	ngOnChanges(changes: SimpleChanges) {
 		this.buildHand();

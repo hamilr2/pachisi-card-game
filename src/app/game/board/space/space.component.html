@@ -2,18 +2,23 @@
 	[ngClass]="{
 		outer: true,
 		start: space.isStart,
-		goal: space.isGoal
+		goal: space.isGoal,
+		selectable: isSpaceSelectable()
 	}"
 	[ngStyle]="{
 		'border-color': space.player.color,
 		'background-color': space.player.color
 	}"
+	(click)="onClick()"
 >
 	<div
-		class="piece"
 		*ngIf="space.piece"
+		[ngClass]="{
+			piece: true,
+			selectable: isPieceSelectable()
+		}"
 		[ngStyle]="{
-			'background-color': space.player.color
+			'background-color': space.piece.player.color
 		}"
 	></div>
 </div>

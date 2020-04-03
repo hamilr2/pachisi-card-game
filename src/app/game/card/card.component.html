@@ -3,7 +3,8 @@
 		card: true,
 		blue: card.color === 'blue',
 		red: card.color === 'red',
-		clicked: !!active
+		clicked: !!active,
+		'not-playable': !isPlayable()
 	}"
 	(click)="!active && onClickCard()"
 	>
@@ -13,12 +14,13 @@
 		<div class="corner bottomLeft">{{ card.symbol }}</div>
 		<div class="corner bottomRight">{{ card.symbol }}</div>
 	</div>
+	<div class="error-text" *ngIf="!isPlayable()">Not Playable</div>
 	<div class="center">
 		<div class="centerNumber">{{ card.symbol }}</div>
 	</div>
 	<div *ngIf="active === true" class="controls">
-		<button (click)="onClickPlay($event)">Play</button>
-		<button (click)="onClickDiscard($event)">Discard</button>
+		<button *ngIf="isPlayable()" (click)="onClickPlay($event)">Play</button>
+		<button *ngIf="interfaceService.discardNecessary" (click)="onClickDiscard($event)">Discard</button>
 		<button (click)="onClickCancel($event)" class="cancelButton">Cancel</button>
 	</div>
 </div>

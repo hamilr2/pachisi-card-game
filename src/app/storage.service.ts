@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Player } from './game/player.model';
 import { Piece } from './game/piece.model';
 import { Space } from './game/space.model';
+import { GameService } from './game/game.service';
 
 @Injectable({
 	providedIn: 'root'
@@ -50,7 +51,7 @@ export class StorageService {
 		// Init empty-ish Players
 		newGame.players = loadedGame.flatPlayers.map(player => new Player(player));
 
-		// Build pieces
+		// Build initial pieces
 		const pieceList = loadedGame.flatPieces.map((piece: any) => {
 			const newPiece = new Piece(piece);
 			newPiece.player = newGame.players[piece.playerId];
@@ -65,6 +66,8 @@ export class StorageService {
 			return new Space(flatSpace);
 		};
 
+		const boardSpaces: Space[] = [];
+
 		// Fully hydrate the player
 		newGame.players.forEach((player, index) => {
 			const flatPlayer = loadedGame.flatPlayers[index];
@@ -72,14 +75,22 @@ export class StorageService {
 			player.home = flatPlayer.homePieceIds.map(pieceId => pieceList[pieceId]);
 			player.goal = flatPlayer.flatGoal.map(hydrateSpaces);
 			player.spaces = flatPlayer.flatSpaces.map(hydrateSpaces);
+			boardSpaces.push(...player.spaces);
 		});
 
-
+		// Hydrate piece spaces
+		pieceList.forEach((piece) => {
+			if (piece.spaceId !== -1) {
+				piece.space = boardSpaces[piece.spaceId];
+			} else if (piece.goalId !== -1) {
+				piece.space = piece.player.goal[piece.goalId];
+			}
+		});
 
 		return newGame;
 	}
 
-	saveGame(game: any, key: string = 'defaultGame'): any {
+	saveGame(game: GameService, key: string = 'defaultGame'): any {
 		const { players } = game;
 
 		const propertiesToSaveDirectly = [
@@ -106,8 +117,19 @@ export class StorageService {
 		const flatPieces = pieceList.map((piece: Piece) => {
 			const flatPiece: any = Object.assign({}, piece);
 			flatPiece.playerId = players.findIndex(thisPlayer => piece.player === thisPlayer);
-
+			const spaceId = game.boardSpaces.findIndex(thisSpace => piece.space === thisSpace);
+			if (spaceId !== -1) {
+				flatPiece.spaceId = spaceId;
+			} else {
+				const goalSpaceId = piece.player.goal.findIndex(thisGoalSpace => thisGoalSpace === piece.space);
+				if (goalSpaceId !== -1) {
+					flatPiece.goalId = goalSpaceId;
+				} else {
+					flatPiece.spaceId = -1;
+				}
+			}
 			delete flatPiece.player;
+			delete flatPiece.space;
 
 			return flatPiece;
 		});

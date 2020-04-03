@@ -1,8 +1,10 @@
 import { Card } from './card.model';
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable, Output } from '@angular/core';
 import { StorageService } from '../storage.service';
 import { Space } from './space.model';
 import { Player } from './player.model';
+import { Piece } from './piece.model';
+import { CardResult, MovablePiece } from './interfaces';
 
 const shuffle = (items: Array<any>) => {
 	return items.map(item => {
@@ -32,6 +34,8 @@ export class GameService {
 	hasDiscarded: boolean;
 	round: number;
 	turn: number;
+
+	@Output() update = new EventEmitter<void>();
 
 	deal() {
 		if (this.deck.length === 0) {
@@ -63,6 +67,7 @@ export class GameService {
 		this.turn++;
 		this.hasDiscarded = false;
 		this.save();
+		this.update.emit();
 	}
 
 	constructor(private storage: StorageService) {
@@ -73,6 +78,8 @@ export class GameService {
 			Object.assign(this, loadedGame);
 			this.buildBoardSpaces();
 		}
+		this.player = this.players[0];
+		this.update.emit();
 	}
 
 	newGame() {
@@ -98,7 +105,71 @@ export class GameService {
 		return HAND_SIZE - ((this.round - 1) % 5);
 	}
 
-	public playCard(card: Card): boolean {
+	public getMovablePiecesForCard(card: Card, player: Player = this.player): CardResult {
+		let errorMessage = '';
+
+		if (card.basic) {
+			const boardPieces = player.pieces.filter((piece: Piece) => !!piece.space);
+			if (boardPieces.length === 0) {
+				errorMessage = 'All pieces are still in the Home area!';
+			} else {
+				const movablePieces = boardPieces.map((piece: Piece) => {
+					return {
+						piece,
+						spacePossibilities: this.getSpacePossibilitesForPiece(piece),
+					};
+				}).reduce((result, { piece, spacePossibilities }): MovablePiece[] => {
+					if (!spacePossibilities.length) {
+						return result;
+					} else {
+						const spaceUnderConsideration = spacePossibilities[card.value - 1];
+						if (spaceUnderConsideration.piece && spaceUnderConsideration.piece.player === player) {
+							return result;
+						} else {
+							return [...result, {
+								piece,
+								spaces: [spaceUnderConsideration]
+							}];
+						}
+					}
+				}, []);
+				return {
+					movablePieces
+				}
+			}
+		} else {
+			errorMessage = 'Not Implemented';
+		}
+
+		return {
+			errorMessage,
+			movablePieces: []
+		};
+	}
+
+	public getSpacePossibilitesForPiece(piece: Piece): Space[] {
+		const MAX_CARD_VALUE = 13;
+		if (!piece.space) {
+			return [];
+		}
+		if (piece.space.isGoal) {
+			/// something
+			return [];
+		} else {
+			const currentIndex = this.boardSpaces.findIndex(thisSpace => thisSpace === piece.space);
+			const spacePossibilities = this.boardSpaces.slice(currentIndex + 1, currentIndex + 1 + MAX_CARD_VALUE);
+			if (spacePossibilities.length !== MAX_CARD_VALUE) {
+				spacePossibilities.push(...this.boardSpaces.slice(0, MAX_CARD_VALUE - spacePossibilities.length));
+			}
+			const startSpace = spacePossibilities.find(thisSpace => thisSpace.isStart && thisSpace.player === this.player);
+			if (startSpace) {
+				console.log('Possibility of moving into Home! Not implemented');
+			}
+			return spacePossibilities;
+		}
+	}
+
+	public playCard(card: Card, piece?: Piece, space?: Space): boolean {
 
 		let errorMessage = '';
 
@@ -106,23 +177,32 @@ export class GameService {
 			if (this.player.home.length > 0) {
 				if (!this.player.spaces[0].piece) {
 					this.player.spaces[0].piece = this.player.home.shift();
+					this.player.spaces[0].piece.space = this.player.spaces[0];
 				} else {
 					errorMessage = 'Home space is already occupied!';
 				}
 			} else {
 				errorMessage = 'No pieces left in home!';
 			}
+		} else if (card.basic && piece && space) {
+			// some validation
+
+			const oldSpace = piece.space;
+
+			piece.space = space;
+			space.piece = piece;
+			oldSpace.piece = null;
 		}
 
 		if (errorMessage) {
 			alert(errorMessage);
 			return false;
-		} else {
-			this.hand = this.hand.filter((thisCard: Card) => thisCard !== card);
-			this.discard.push(card);
-			this.advanceTurn();
-			return true;
 		}
+
+		this.hand = this.hand.filter((thisCard: Card) => thisCard !== card);
+		this.discard.push(card);
+		this.advanceTurn();
+		return true;
 	}
 
 	public discardCard(card: Card): void {
@@ -134,6 +214,7 @@ export class GameService {
 			this.hasDiscarded = true;
 			this.hand.push(this.deck.shift());
 			this.save();
+			this.update.emit();
 		}
 	}
 
@@ -146,45 +227,38 @@ export class GameService {
 				id: i
 			}));
 		}
-		this.player = this.players[0];
 	}
 
 	buildDeck() {
 		const cards = [
 			{
 				symbol: '?',
-				color: 'red',
 				quantity: 6,
 				startable: true
 			},
 			{
 				symbol: 'S',
-				color: 'red',
 			},
 			{
 				symbol: '1/11',
-				color: 'red',
 				startable: true
 			},
-			{ symbol: '2' },
-			{ symbol: '3' },
+			{ value: 2 },
+			{ value: 3 },
 			{
 				symbol: '±4',
-				color: 'red'
 			},
-			{ symbol: '5' },
-			{ symbol: '6' },
+			{ value: 5 },
+			{ value: 6 },
 			{
 				symbol: '7',
-				color: 'red'
 			},
-			{ symbol: '8' },
-			{ symbol: '9' },
-			{ symbol: '10' },
-			{ symbol: '12' },
+			{ value: 8 },
+			{ value: 9 },
+			{ value: 10 },
+			{ value: 12 },
 			{
 				symbol: '13',
-				color: 'red',
 				startable: true
 			}
 		];
