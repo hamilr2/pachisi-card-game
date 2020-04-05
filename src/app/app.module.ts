@@ -11,6 +11,9 @@ import { BoardComponent } from './game/board/board.component';
 import { SpaceComponent } from './game/board/space/space.component';
 import { HomeComponent } from './game/board/home/home.component';
 import { GoalComponent } from './game/board/goal/goal.component';
+import { DeckComponent } from './game/deck/deck.component';
+import { HandCardComponent } from './game/hand/hand-card/hand-card.component';
+import { PieceComponent } from './game/board/piece/piece.component';
 
 
 const routes: Routes = [
@@ -39,7 +42,10 @@ const routes: Routes = [
 		BoardComponent,
 		SpaceComponent,
 		HomeComponent,
-		GoalComponent
+		GoalComponent,
+		DeckComponent,
+		HandCardComponent,
+		PieceComponent
 	],
 	imports: [
 		BrowserModule,

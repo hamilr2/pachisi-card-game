@@ -1,7 +1,5 @@
-import { Component, EventEmitter, OnInit, Input, Output } from '@angular/core';
+import { Component, OnInit, Input, OnChanges } from '@angular/core';
 import { Card } from '../card.model';
-import { GameService } from '../game.service';
-import { InterfaceService } from '../interface.service';
 
 @Component({
 	selector: 'app-card',
@@ -9,41 +7,27 @@ import { InterfaceService } from '../interface.service';
 	styleUrls: ['./card.component.css']
 })
 
-export class CardComponent implements OnInit {
-	@Input() card: Card;
-	@Output() activeChange = new EventEmitter<{card: Card, active: boolean}>();
-	@Output() playCard = new EventEmitter<Card>();
-	@Output() discardCard = new EventEmitter<Card>();
+export class CardComponent implements OnChanges , OnInit {
+	@Input() card?: Card;
 
-	active = false;
+	constructor() { }
 
-	constructor(private game: GameService, public interfaceService: InterfaceService) { }
-
-	isPlayable() {
-		return !!this.game.getMovablePiecesForCard(this.card).movablePieces.length;
+	setDefaultCard() {
+		if (!this.card) {
+			this.card = new Card({
+				symbol: 'Dog',
+				color: 'blue'
+			});
+		}
 	}
 
-	onClickCard() {
-		this.active = !this.active;
-		this.activeChange.emit({card: this.card, active: this.active});
+
+	ngOnInit(): void {
+		this.setDefaultCard();
 	}
 
-	onClickCancel(e: Event) {
-		e.stopPropagation();
-		this.active = false;
-		this.activeChange.emit({card: this.card, active: this.active});
+	ngOnChanges(): void {
+		this.setDefaultCard();
 	}
-
-	onClickPlay(e: Event) {
-		e.stopPropagation();
-		this.playCard.emit(this.card);
-	}
-
-	onClickDiscard(e: Event) {
-		e.stopPropagation();
-		this.discardCard.emit(this.card);
-	}
-
-	ngOnInit(): void { }
 
 }

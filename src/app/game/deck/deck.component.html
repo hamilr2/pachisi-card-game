@@ -1,0 +1,8 @@
+<div class="deck">
+	<app-card
+		[card]="cards.slice(-1)[0]"
+		[ngClass]="{
+			fade: !cards.length
+		}"
+	></app-card>
+</div>

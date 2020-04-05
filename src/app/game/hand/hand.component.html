@@ -6,14 +6,14 @@
 	</div>
 	<div class="hand">
 		<div class="arch-wrapper">
-			<app-card 
+			<app-hand-card 
 				*ngFor="let card of builtHand" [card]="card.card"
 				(discardCard)="onCardDiscardCard($event)"
 				(playCard)="onCardPlayCard($event)"
 				(activeChange)="onCardActiveChange($event)"
 				[ngClass]="{active: card.active}"
 				[ngStyle]="{left: '' + card.left + 'px', transform: 'rotate(' + card.rotation + 'deg)', top: '' + card.top + 'px'}"
-			></app-card>
+			></app-hand-card>
 		</div>
 	</div>
 </div>

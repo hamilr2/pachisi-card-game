@@ -3,6 +3,7 @@ import { Card } from './card.model';
 import { Space } from './space.model';
 
 const NUMBER_OF_PIECES = 5;
+const GOAL_SIZE = 4;
 const SPACES_PER_PLAYER = 16;
 
 interface PlayerOptions {
@@ -12,11 +13,11 @@ interface PlayerOptions {
 
 export class Player {
 	color: string;
-	goal: Space[];
-	hand: Card[];
-	home: Piece[];
+	goal: Space[] = [];
+	hand: Card[] = [];
+	home: Piece[] = [];
 	id: number;
-	pieces: Piece[];
+	pieces: Piece[] = [];
 	spaces: Space[] = [];
 
 	constructor(options: PlayerOptions) {
@@ -28,7 +29,7 @@ export class Player {
 		}));
 		this.home = [...this.pieces];
 
-		this.goal = new Array(NUMBER_OF_PIECES).fill({}).map(() => new Space({
+		this.goal = new Array(GOAL_SIZE).fill({}).map(() => new Space({
 			isGoal: true,
 			player: this
 		}));

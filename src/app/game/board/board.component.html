@@ -2,8 +2,15 @@
 	<div class="spaceRow" *ngFor="let player of game.players">
 		<app-space *ngFor="let space of player.spaces" [space]="space"></app-space>
 	</div>
-	<div class="playerRow" *ngFor="let player of game.players">
+	<div 
+		[ngClass]="{
+			playerRow: true
+		}" *ngFor="let player of game.players">
+		<div class="turnIndicator">
+			<div class="indicator" *ngIf="player === game.activePlayer">></div>
+		</div>
 		<app-home [player]="player"></app-home>
 		<app-goal [player]="player"></app-goal>
+		Cards in hand: {{ player.hand.length }}
 	</div>
 </div>

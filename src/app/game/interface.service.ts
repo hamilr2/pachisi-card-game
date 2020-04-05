@@ -26,47 +26,36 @@ export class InterfaceService {
 
 	constructor(private game: GameService) {
 		game.update.subscribe(() => { this.onUpdate(); });
+		this.player = game.players[0]; // todo
 		this.onUpdate();
-		// this.player = game.players[0];
 	}
 
 	onUpdate() {
-		this.discardNecessary = this.isDiscardNecessary();
+		this.discardNecessary = this.isDiscardNecessary(this.player);
 	}
 
-	isDiscardNecessary(player: Player = this.game.players[0]) {
-		const playables = this.game.hand.filter((card: Card) => {
-			return !!this.game.getMovablePiecesForCard(card).movablePieces.length;
+	isDiscardNecessary(player: Player) {
+		const playables = player.hand.filter((card: Card) => {
+			return !!this.game.getMovablePiecesForCard(player, card).movablePieces.length;
 		});
 		return playables.length === 0;
 	}
 
-	attemptPlayCard(card: Card, player?: Player) {
-		player = player || this.game.players[0];
+	attemptPlayCard(player: Player, card: Card) {
 
-		if (card.startable === true) {
-			// choose between moving and starting, if applicable
-			this.game.playCard(card);
-			return true;
-		}
-		if (card.basic) {
-			const { movablePieces, errorMessage } = this.game.getMovablePiecesForCard(card);
-			if (errorMessage) {
-				this.errorMessage = errorMessage;
-				return false;
-			}
-
-			if (movablePieces.length === 0) {
-				this.errorMessage = 'No pieces are able to move';
-			} else {
-				this.activeCard = card;
-				this.selectingPiece = true;
-				this.movablePieces = movablePieces;
-				return true;
-			}
-		} else {
-			this.errorMessage = 'Not Implemented';
+		const { movablePieces, errorMessage } = this.game.getMovablePiecesForCard(player, card);
+		if (errorMessage) {
+			this.errorMessage = errorMessage;
 			return false;
+		}
+
+		if (movablePieces.length === 0) {
+			this.errorMessage = 'No pieces are able to move';
+		} else {
+			this.activeCard = card;
+			this.selectingPiece = true;
+			this.movablePieces = movablePieces;
+			return true;
 		}
 	}
 
@@ -85,7 +74,7 @@ export class InterfaceService {
 	}
 
 	selectSpace(space: Space) {
-		this.game.playCard(this.activeCard, this.activePiece, space);
+		this.game.playCard(this.player, this.activeCard, this.activePiece, space);
 		this.selectingSpace = false;
 		this.activeCard = null;
 		this.activePiece = null;

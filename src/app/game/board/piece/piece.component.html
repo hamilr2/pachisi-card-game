@@ -1,0 +1,10 @@
+<div class="piece"
+	[ngStyle]="{
+		'background-color': piece.color
+	}"
+	[ngClass]="{
+		piece: true,
+		selectable: isPieceSelectable()
+	}"
+	(click)="onClick()"
+></div>

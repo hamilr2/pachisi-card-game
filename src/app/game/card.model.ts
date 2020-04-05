@@ -2,17 +2,21 @@
 interface CardOptions {
 	basic?: boolean;
 	color?: string;
+	special?: string;
 	startable?: boolean;
 	symbol?: string;
 	value?: number;
+	values?: number[];
 }
 
 export class Card {
 	basic = false;
 	color = 'blue';
+	special: string;
 	startable = false;
 	symbol: string;
 	value: number;
+	values: number[];
 
 	constructor(options: CardOptions) {
 		Object.assign(this, options);

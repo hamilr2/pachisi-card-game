@@ -3,7 +3,12 @@
 <div>Round {{game.round}}, turn {{game.turn}}, cards left in deck: {{ game.deck.length }}, cards in discard: {{ game.discard.length }}</div>
 <app-board [game]="game"></app-board>
 <app-hand 
+	[player]="game.player"
 	[game]="game"
-	[cards]="game.hand"
+	[cards]="game.player.hand"
 	[interfaceService]="interfaceService"
 ></app-hand>
+<app-deck
+	[cards]="game.discard"
+	[visible]="true">
+</app-deck>

@@ -11,14 +11,8 @@
 	}"
 	(click)="onClick()"
 >
-	<div
+	<app-piece
 		*ngIf="space.piece"
-		[ngClass]="{
-			piece: true,
-			selectable: isPieceSelectable()
-		}"
-		[ngStyle]="{
-			'background-color': space.piece.player.color
-		}"
-	></div>
+		[piece]="space.piece"
+	></app-piece>
 </div>

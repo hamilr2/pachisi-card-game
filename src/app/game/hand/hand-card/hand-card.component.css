@@ -1,0 +1,18 @@
+app-card .error-text {
+	width: 100%;
+	top: 10px;
+	left: 0px;
+	text-align: center;
+	position: absolute;
+	color: white;
+	font-size: 12px;
+}
+
+app-card .controls {
+	position: absolute;
+	z-index: 1;
+	width: 100%;
+	text-align: center;
+	left: 0px;
+	top: 50px;
+}

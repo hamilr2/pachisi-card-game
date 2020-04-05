@@ -1,0 +1,15 @@
+<app-card
+	[card]="card"
+	(click)="!active && onClickCard()"
+	[ngClass]="{
+		clicked: !!active,
+		'not-playable': !isPlayable()
+	}"
+>
+	<div *ngIf="active === true" class="controls">
+		<button *ngIf="isPlayable()" (click)="onClickPlay($event)">Play</button>
+		<button *ngIf="interfaceService.discardNecessary" (click)="onClickDiscard($event)">Discard</button>
+		<button (click)="onClickCancel($event)" class="cancelButton">Cancel</button>
+	</div>
+	<div class="error-text" *ngIf="!isPlayable()">Not Playable</div>
+</app-card>

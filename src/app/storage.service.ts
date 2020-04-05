@@ -28,7 +28,6 @@ export class StorageService {
 
 		Object.entries({
 			deck: 'Card',
-			hand: 'Card',
 			discard: 'Card',
 		}).forEach(([prop, type]) => {
 			if (type === 'Card') {
@@ -75,6 +74,9 @@ export class StorageService {
 			player.home = flatPlayer.homePieceIds.map(pieceId => pieceList[pieceId]);
 			player.goal = flatPlayer.flatGoal.map(hydrateSpaces);
 			player.spaces = flatPlayer.flatSpaces.map(hydrateSpaces);
+			player.hand = flatPlayer.flatHand.map((card: any) => {
+				return new Card(card);
+			});
 			boardSpaces.push(...player.spaces);
 		});
 
@@ -87,6 +89,8 @@ export class StorageService {
 			}
 		});
 
+		console.log(newGame);
+
 		return newGame;
 	}
 
@@ -96,7 +100,6 @@ export class StorageService {
 		const propertiesToSaveDirectly = [
 			'deck',
 			'discard',
-			'hand',
 			'hasDiscarded',
 			'round',
 			'turn'
@@ -159,11 +162,13 @@ export class StorageService {
 			flatPlayer.homePieceIds = convertToIds(player.home, pieceList);
 			flatPlayer.flatGoal = staticSpaces(player.goal);
 			flatPlayer.flatSpaces = staticSpaces(player.spaces);
+			flatPlayer.flatHand = player.hand; // auto-flattens
 
 			delete flatPlayer.spaces;
 			delete flatPlayer.goal;
 			delete flatPlayer.home;
 			delete flatPlayer.pieces;
+			delete flatPlayer.hand;
 
 			return flatPlayer;
 		});

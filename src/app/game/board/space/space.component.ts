@@ -13,15 +13,6 @@ export class SpaceComponent implements OnInit {
 
 	constructor(private interfaceService: InterfaceService) { }
 
-	isPieceSelectable() {
-		if (this.space.piece && this.interfaceService.selectingPiece) {
-			if (this.interfaceService.movablePieces.length) {
-				return !!this.interfaceService.movablePieces.find(({ piece }) => piece === this.space.piece);
-			}
-		}
-		return false;
-	}
-
 	isSpaceSelectable() {
 		if (this.space && this.interfaceService.selectingSpace) {
 			if (this.interfaceService.selectableSpaces.length) {
@@ -31,9 +22,7 @@ export class SpaceComponent implements OnInit {
 	}
 
 	onClick() {
-		if (this.isPieceSelectable()) {
-			this.interfaceService.selectPiece(this.space.piece);
-		} else if (this.isSpaceSelectable()) {
+		if (this.isSpaceSelectable()) {
 			this.interfaceService.selectSpace(this.space);
 		}
 	}

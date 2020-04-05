@@ -2,6 +2,7 @@ import { Component, EventEmitter, OnInit, Input, Output, SimpleChanges, OnChange
 import { Card } from '../card.model';
 import { GameService } from '../game.service';
 import { InterfaceService } from '../interface.service';
+import { Player } from '../player.model';
 
 @Component({
 	selector: 'app-hand',
@@ -12,17 +13,18 @@ export class HandComponent implements OnInit, OnChanges {
 	@Input() game: GameService;
 	@Input() cards: Card[];
 	@Input() interfaceService: InterfaceService;
+	@Input() player: Player;
 
 	builtHand = [];
 
 	constructor() { }
 
 	onCardPlayCard(card: Card) {
-		this.interfaceService.attemptPlayCard(card);
+		this.interfaceService.attemptPlayCard(this.player, card);
 	}
 
 	onCardDiscardCard(card: Card) {
-		this.game.discardCard(card);
+		this.game.discardCard(this.player, card);
 	}
 
 	onCardActiveChange({card, active}: {card: Card, active: boolean}) {

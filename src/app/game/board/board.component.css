@@ -5,3 +5,7 @@
 .playerRow {
 	display: flex;
 }
+
+.playerRow .turnIndicator {
+	width: 50px;
+}
