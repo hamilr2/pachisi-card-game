@@ -6,6 +6,7 @@
 		repeating-linear-gradient(45deg, rgba(0,0,0,.4), rgba(0,0,0,0) 40px);
 	display: block;
 	padding: 5px 5px 0px;
+	user-select: none;
 }
 
 .button-wrapper {

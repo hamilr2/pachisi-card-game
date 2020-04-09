@@ -1,8 +1,1 @@
-<div class="homeArea" [ngStyle]="{
-	'background-color': player.color
-}">
-	<app-piece 
-		*ngFor="let homePiece of player.home"
-		[piece]="homePiece"
-	></app-piece>
-</div>
+<app-space-set [spaces]="homeSpaces"></app-space-set>

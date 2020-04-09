@@ -31,17 +31,17 @@ export class InterfaceService {
 
 	onUpdate() {
 		this.player = this.game.players[0]; // todo, should only be necessary for a new game
-		this.discardNecessary = this.isDiscardNecessary(this.player);
+		this.discardNecessary = this.isDiscardNecessary();
 	}
 
-	isDiscardNecessary(player: Player) {
+	isDiscardNecessary(player: Player = this.player) {
 		const playables = player.hand.filter((card: Card) => {
 			return !!this.game.getMovablePiecesForCard(player, card).movablePieces.length;
 		});
 		return playables.length === 0;
 	}
 
-	attemptPlayCard(player: Player, card: Card) {
+	attemptPlayCard(card: Card, player: Player = this.player) {
 
 		const { movablePieces, errorMessage } = this.game.getMovablePiecesForCard(player, card);
 		if (errorMessage) {
@@ -73,11 +73,15 @@ export class InterfaceService {
 		this.selectingSpace = true;
 	}
 
+	cancelSelectingSpace() {
+		this.activePiece = null;
+		this.selectingPiece = true;
+		this.selectingSpace = false;
+	}
+
 	selectSpace(space: Space) {
 		this.game.playCard(this.player, this.activeCard, this.activePiece, space);
-		this.selectingSpace = false;
-		this.activeCard = null;
-		this.activePiece = null;
+		this.reset();
 	}
 
 	reset() {

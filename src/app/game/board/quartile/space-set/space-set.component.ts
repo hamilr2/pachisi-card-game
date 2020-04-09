@@ -12,10 +12,7 @@ export class SpaceSetComponent implements OnInit {
 	@Input() parentRotation: number;
 	@Input() isGoal: boolean;
 
-	constructor() {
-		console.log(this.isGoal);
-	}
-
+	constructor() { }
 
 	ngOnInit(): void {
 	}

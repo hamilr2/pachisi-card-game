@@ -21,6 +21,10 @@
 	background-color: white !important;
 }
 
+.outer.start, .outer.goal {
+	border-color: rgba(0,0,0,.3) !important;
+}
+
 /*.piece {
 	border: solid 1px black;
 	margin: 0px;

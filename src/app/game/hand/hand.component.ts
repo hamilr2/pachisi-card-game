@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Input, Output, SimpleChanges, OnChanges } from '@angular/core';
+import { Component, OnInit, Input, SimpleChanges, OnChanges } from '@angular/core';
 import { Card } from '../card.model';
 import { GameService } from '../game.service';
 import { InterfaceService } from '../interface.service';
@@ -19,16 +19,14 @@ export class HandComponent implements OnInit, OnChanges {
 
 	constructor() { }
 
-	onCardPlayCard(card: Card) {
-		this.interfaceService.attemptPlayCard(this.player, card);
-	}
-
-	onCardDiscardCard(card: Card) {
-		this.game.discardCard(this.player, card);
-	}
-
 	onCardActiveChange({card, active}: {card: Card, active: boolean}) {
-		this.builtHand.find(({card: thisCard}) => thisCard === card).active = active;
+		this.builtHand.forEach((builtHandCard) => {
+			if (builtHandCard.card === card) {
+				builtHandCard.active = active;
+			} else {
+				builtHandCard.active = false;
+			}
+		});
 	}
 
 	buildHand() {

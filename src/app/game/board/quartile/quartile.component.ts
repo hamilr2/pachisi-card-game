@@ -19,11 +19,13 @@ export class QuartileComponent implements OnInit {
 	spaceSets: Space[][];
 	setRotation: number[] = [-90, 0, -45, -90];
 
-	constructor(public game: GameService) {
-		//this.buildSpaceSets();
-	}
+	constructor(public game: GameService) { }
 
 	ngOnInit(): void {
+		this.buildSpaceSets();
+		this.game.majorUpdate.subscribe(() => {
+			this.buildSpaceSets();
+		});
 	}
 
 	buildSpaceSets(): Space[][] {
@@ -31,7 +33,6 @@ export class QuartileComponent implements OnInit {
 		for (let set = 0; set < NUM_SPACE_SETS; set++) {
 			this.spaceSets.push(this.player.spaces.slice(set * SPACE_SET_SIZE, (set * SPACE_SET_SIZE) + SPACE_SET_SIZE));
 		}
-		console.log(this.spaceSets);
 		return this.spaceSets;
 	}
 

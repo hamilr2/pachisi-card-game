@@ -2,9 +2,7 @@
 	<div class="hand">
 		<div class="arch-wrapper">
 			<app-hand-card 
-				*ngFor="let card of builtHand" [card]="card.card"
-				(discardCard)="onCardDiscardCard($event)"
-				(playCard)="onCardPlayCard($event)"
+				*ngFor="let card of builtHand" [card]="card.card" [active]="card.active"
 				(activeChange)="onCardActiveChange($event)"
 				[ngClass]="{active: card.active}"
 				[ngStyle]="{left: '' + card.left + 'px', transform: 'rotate(' + card.rotation + 'deg)', top: '' + card.top + 'px'}"

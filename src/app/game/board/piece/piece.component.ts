@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Piece } from '../../piece.model';
 import { InterfaceService } from '../../interface.service';
 
@@ -25,9 +25,10 @@ export class PieceComponent implements OnInit {
 	ngOnInit(): void {
 	}
 
-	onClick() {
+	onClick(event: Event) {
 		if (this.isPieceSelectable()) {
 			this.interfaceService.selectPiece(this.piece);
+			event.stopPropagation();
 		}
 	}
 }

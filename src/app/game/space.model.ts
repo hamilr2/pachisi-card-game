@@ -4,6 +4,7 @@ import { Player } from './player.model';
 interface SpaceOptions {
 	isGoal?: boolean;
 	isStart?: boolean;
+	piece?: Piece;
 	player: Player;
 }
 
@@ -13,7 +14,6 @@ export class Space {
 	isGoal = false;
 	isStart = false;
 	player: Player;
-
 	piece: Piece;
 
 	id: number;

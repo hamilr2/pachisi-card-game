@@ -21,9 +21,10 @@ export class SpaceComponent implements OnInit {
 		}
 	}
 
-	onClick() {
+	onClick(event: Event) {
 		if (this.isSpaceSelectable()) {
 			this.interfaceService.selectSpace(this.space);
+			event.stopPropagation();
 		}
 	}
 

@@ -1,10 +1,11 @@
 import { Card } from './card.model';
-import { EventEmitter, Injectable, Output } from '@angular/core';
+import { Injectable, Output } from '@angular/core';
 import { StorageService } from '../storage.service';
 import { Space } from './space.model';
 import { Player } from './player.model';
 import { Piece } from './piece.model';
 import { CardResult, MovablePiece } from './interfaces';
+import { Subject } from 'rxjs';
 
 const shuffle = (items: Array<any>) => {
 	return items.map(item => {
@@ -37,7 +38,15 @@ export class GameService {
 	turn: number;
 	activePlayer: Player;
 
-	@Output() update = new EventEmitter<void>();
+	updates: string[] = [];
+
+	update = new Subject<string[]>();
+	majorUpdate = new Subject<void>();
+
+	sendUpdate(updates: string[] = []) {
+		this.update.next([...updates, ...this.updates]);
+		this.updates = [];
+	}
 
 	deal() {
 		if (this.deck.length === 0) {
@@ -50,7 +59,6 @@ export class GameService {
 				player.hand.push(this.drawCard());
 			}
 		});
-		console.log(this.players);
 	}
 
 	drawCard() {
@@ -84,7 +92,7 @@ export class GameService {
 		}
 		this.hasDiscarded = false;
 		this.save();
-		this.update.emit();
+		this.sendUpdate();
 		if (this.activePlayer !== this.player) {
 			this.takeTurnForPlayer(this.activePlayer);
 		}
@@ -110,7 +118,8 @@ export class GameService {
 		}
 		this.setActivePlayer();
 		this.player = this.players[0];
-		this.update.emit();
+		this.majorUpdate.next();
+		this.sendUpdate();
 	}
 
 	newGame() {
@@ -128,7 +137,8 @@ export class GameService {
 		this.deal();
 		this.setActivePlayer();
 		this.save();
-		this.update.emit();
+		this.majorUpdate.next();
+		this.sendUpdate();
 	}
 
 	save() {
@@ -259,6 +269,7 @@ export class GameService {
 				if (!player.spaces[0].piece) {
 					player.spaces[0].piece = player.home.shift();
 					player.spaces[0].piece.space = player.spaces[0];
+					this.updates.push('home');
 				} else {
 					errorMessage = 'Home space is already occupied!';
 				}
@@ -295,7 +306,7 @@ export class GameService {
 			this.hasDiscarded = true;
 			player.hand.push(this.drawCard());
 			this.save();
-			this.update.emit();
+			this.sendUpdate();
 		}
 	}
 

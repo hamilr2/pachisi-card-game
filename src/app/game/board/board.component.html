@@ -1,19 +1,21 @@
 <div class="board">
-	<div class="quartiles">
+	<div
+		*ngIf="!!players.length"
+		class="quartiles">
 		<app-quartile 
-			[player]="game.players[0]"
+			[player]="players[0]"
 			[rotation]="0"
 		></app-quartile>
 		<app-quartile 
-			[player]="game.players[1]"
+			[player]="players[1]"
 			[rotation]="90"
 		></app-quartile>
 		<app-quartile 
-			[player]="game.players[3]"
+			[player]="players[3]"
 			[rotation]="270"
 		></app-quartile>
 		<app-quartile 
-			[player]="game.players[2]"
+			[player]="players[2]"
 			[rotation]="180"
 		></app-quartile>
 	</div>
@@ -30,7 +32,7 @@
 				[visible]="true">
 			</app-deck>
 			<p class="count">Cards: {{ game.discard.length }}</p>
-			
+
 		</div>
 	</div>
 	

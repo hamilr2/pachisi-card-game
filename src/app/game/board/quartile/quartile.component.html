@@ -3,7 +3,7 @@
 }">
 	<div class="space-set-wrapper">
 		<app-space-set
-			*ngFor="let spaceSet of buildSpaceSets(); let i = index"
+			*ngFor="let spaceSet of spaceSets; let i = index"
 			[spaces]="spaceSet"
 			[parentRotation]="rotation"
 			[rotation]="getSetRotation(i)">

@@ -11,42 +11,42 @@ import { Player } from '../../player.model';
 })
 export class HandCardComponent implements OnInit {
 	@Input() card: Card;
+	@Input() active: boolean;
 	@Output() activeChange = new EventEmitter<{card: Card, active: boolean}>();
-	@Output() playCard = new EventEmitter<Card>();
-	@Output() discardCard = new EventEmitter<Card>();
-
-	active = false;
 
 	constructor(private game: GameService, public interfaceService: InterfaceService) { }
 
-	ngOnInit(): void {
+	ngOnInit(): void { }
+
+	isBeingPlayed() {
+		return this.interfaceService.activeCard === this.card;
 	}
 
 	isPlayable() {
 		// Consider adjusting this to the hand
 		const player: Player = this.interfaceService.player;
-		return !!this.game.getMovablePiecesForCard(player, this.card).movablePieces.length;
+		const hasMovablePieces = !!this.game.getMovablePiecesForCard(player, this.card).movablePieces.length;
+		return hasMovablePieces;
 	}
 
 	onClickCard() {
-		this.active = !this.active;
-		this.activeChange.emit({card: this.card, active: this.active});
+		this.activeChange.emit({card: this.card, active: !this.active});
 	}
 
 	onClickCancel(e: Event) {
 		e.stopPropagation();
-		this.active = false;
-		this.activeChange.emit({card: this.card, active: this.active});
+		this.activeChange.emit({card: this.card, active: false});
+		this.interfaceService.reset();
 	}
 
 	onClickPlay(e: Event) {
 		e.stopPropagation();
-		this.playCard.emit(this.card);
+		this.interfaceService.attemptPlayCard(this.card);
 	}
 
 	onClickDiscard(e: Event) {
 		e.stopPropagation();
-		this.discardCard.emit(this.card);
+		this.game.discardCard(this.interfaceService.player, this.card);
 	}
 
 }

@@ -8,7 +8,10 @@
 	height: 600px;
 	position: relative;
 	background-color: darkblue;
-	background-image: repeating-linear-gradient(45deg, rgba(0,0,0,.2), transparent 20px),repeating-linear-gradient(-45deg, rgba(0,0,0,.2), transparent 20px);
+	background-image: 
+		repeating-linear-gradient(45deg, rgba(0,0,0,.2), transparent 20px),
+		repeating-linear-gradient(-45deg, rgba(0,0,0,.2), transparent 20px),
+		radial-gradient(rgba(255,255,255,.4), rgba(255,255,255,0) 75%, rgba(0,0,0,0) 75%, rgba(0,0,0,.2));
 	border: solid 5px black;
 	padding: 25px;
 }
@@ -21,7 +24,6 @@
 app-quartile {
 	pointer-events: none;
 }
-
 
 .deck-container {
 	width: 100%;

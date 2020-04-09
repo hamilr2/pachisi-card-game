@@ -89,8 +89,6 @@ export class StorageService {
 			}
 		});
 
-		console.log(newGame);
-
 		return newGame;
 	}
 

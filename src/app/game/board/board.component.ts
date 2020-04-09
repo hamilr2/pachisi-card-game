@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { GameService } from '../game.service';
 import { InterfaceService } from '../interface.service';
+import { Player } from '../player.model';
 
 @Component({
 	selector: 'app-board',
@@ -8,11 +9,16 @@ import { InterfaceService } from '../interface.service';
 	styleUrls: ['./board.component.css']
 })
 export class BoardComponent implements OnInit {
-	@Input() game: GameService;
 
-	constructor() { }
+	players: Player[];
+
+	constructor(public game: GameService) { }
 
 	ngOnInit(): void {
+		this.game.majorUpdate.subscribe(() => {
+			this.players = this.game.players;
+		});
+		this.players = this.game.players;
 	}
 
 }

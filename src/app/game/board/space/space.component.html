@@ -9,7 +9,7 @@
 		'border-color': space.player.color,
 		'background-color': space.player.color
 	}"
-	(click)="onClick()"
+	(click)="onClick($event)"
 >
 	<app-piece
 		*ngIf="space.piece"

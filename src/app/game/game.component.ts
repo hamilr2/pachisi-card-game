@@ -15,4 +15,8 @@ export class GameComponent implements OnInit {
 	ngOnInit(): void {
 	}
 
+	onClick() {
+		this.interfaceService.reset();
+	}
+
 }
