@@ -1,25 +1,31 @@
 .outer {
-	border: solid 1px;
-	width: 20px;
-	height: 20px;
-	border-radius: 10px;
+	border: solid 2px;
+	width: 22px;
+	height: 22px;
+	border-radius: 11px;
+	padding: 1px;
+	box-sizing: border-box;
+	background-color:white;
+	box-shadow: 0px 0px 5px white, 0px 0px 5px white, 0px 0px 5px white;
 }
 
 .selectable {
 	border-color: purple !important;
 	box-shadow: 0px 0px 15px purple, 0px 0px 10px purple, 0px 0px 5px purple;
 	z-index: 1;
+	pointer-events: initial;
+	background-image: radial-gradient(purple, rgba(255,255,255,0))
 }
 
 .outer:not(.start):not(.goal) {
-	background-color: initial !important;
+	background-color: white !important;
 }
 
-.piece {
+/*.piece {
 	border: solid 1px black;
-	margin: 2px;
+	margin: 0px;
 	width: 16px;
 	height: 16px;
 	border-radius: 8px;
 	box-sizing: border-box;
-}
+}*/

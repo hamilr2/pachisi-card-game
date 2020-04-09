@@ -1,7 +1,10 @@
-.hand-container {
+:host {
 	width: 100%;
-	position: absolute;
+	position: sticky;
 	bottom: 0px;
+	pointer-events: none;
+	display: block;
+	overflow: hidden;
 }
 
 .hand {
@@ -22,6 +25,7 @@
 	margin-top: 20px;
 	top: 0px;
 	transition: margin-top .4s ease-in-out;
+	pointer-events: initial;
 }
 
 .hand app-hand-card:hover {

@@ -1,6 +1,11 @@
 <div class="errorMessage" *ngIf="!!interfaceService.errorMessage">{{interfaceService.errorMessage}}</div>
-<button (click)="game.newGame()">New Game</button>
-<div>Round {{game.round}}, turn {{game.turn}}, cards left in deck: {{ game.deck.length }}, cards in discard: {{ game.discard.length }}</div>
+<div class="button-wrapper">
+	<button (click)="game.newGame()">New Game</button>
+	<button
+		(click)="game.advanceRound()"
+	>Advance Round</button>
+</div>
+<div class="game-info"><span>Round {{game.round}}, Turn {{game.turn}}</span></div>
 <app-board [game]="game"></app-board>
 <app-hand 
 	[player]="game.player"
@@ -8,7 +13,3 @@
 	[cards]="game.player.hand"
 	[interfaceService]="interfaceService"
 ></app-hand>
-<app-deck
-	[cards]="game.discard"
-	[visible]="true">
-</app-deck>

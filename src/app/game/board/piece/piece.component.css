@@ -1,12 +1,12 @@
 .piece {
 	border: solid 1px black;
-	margin: 2px;
 	width: 16px;
 	height: 16px;
 	border-radius: 8px;
 	box-sizing: border-box;
 }
 .piece.selectable {
+	pointer-events: initial;
 	border-color: purple !important;
 	box-shadow: 0px 0px 15px purple, 0px 0px 10px purple, 0px 0px 5px purple;
 	z-index: 1;

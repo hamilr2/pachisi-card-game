@@ -1,0 +1,26 @@
+<div class="quartile" [ngStyle]="{
+	transform: 'rotate(' + rotation + 'deg)'
+}">
+	<div class="space-set-wrapper">
+		<app-space-set
+			*ngFor="let spaceSet of buildSpaceSets(); let i = index"
+			[spaces]="spaceSet"
+			[parentRotation]="rotation"
+			[rotation]="getSetRotation(i)">
+		</app-space-set>
+	</div>
+
+	<div class="turnIndicator">
+		<div class="indicator" *ngIf="player === game.activePlayer">></div>
+	</div>
+	<app-home [player]="player"></app-home>
+	<app-goal [player]="player"></app-goal>
+	<div class="num-cards"
+		[ngStyle]="{
+			transform: 'rotate(' + rotation * -1 + 'deg)'
+		}"
+	>
+		<p>Cards in hand: {{ player.hand.length }}</p>
+	</div>
+	
+</div>

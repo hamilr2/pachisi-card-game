@@ -1,11 +1,69 @@
-.spaceRow {
+:host {
 	display: flex;
+	justify-content: center;
 }
 
-.playerRow {
-	display: flex;
+.board {
+	width: 600px;
+	height: 600px;
+	position: relative;
+	background-color: darkblue;
+	background-image: repeating-linear-gradient(45deg, rgba(0,0,0,.2), transparent 20px),repeating-linear-gradient(-45deg, rgba(0,0,0,.2), transparent 20px);
+	border: solid 5px black;
+	padding: 25px;
 }
 
-.playerRow .turnIndicator {
-	width: 50px;
+.quartiles {
+	display: grid;
+	grid-template-columns: 50% 50%;
+}
+
+app-quartile {
+	pointer-events: none;
+}
+
+
+.deck-container {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	top: 0px;
+	left: 0px;
+	pointer-events: none;
+}
+
+.deck {
+	width: 76px;
+	height: 116px;
+	margin: 0px 10px;
+	position: relative;
+}
+
+.deck p {
+	text-align: center;
+	color: white;
+	font-family: sans-serif;
+	font-weight: 500;
+	font-size: 14px;
+	line-height: 20px;
+	position: absolute;
+	margin: 0px;
+	width: 100%;
+}
+
+.deck p.label {
+	top: -20px;
+}
+
+.deck p.count {
+	bottom: -20px;
+}
+
+app-deck, app-card {
+	position: absolute;
+	transform: scale(.4);
+	margin: -87px -57px;
 }

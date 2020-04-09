@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DeckComponent } from './deck.component';
+import { SpaceSetComponent } from './space-set.component';
 
-describe('DeckComponent', () => {
-	let component: DeckComponent;
-	let fixture: ComponentFixture<DeckComponent>;
+describe('SpaceSetComponent', () => {
+	let component: SpaceSetComponent;
+	let fixture: ComponentFixture<SpaceSetComponent>;
 
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
-			declarations: [ DeckComponent ]
+			declarations: [ SpaceSetComponent ]
 		})
 		.compileComponents();
 	}));
 
 	beforeEach(() => {
-		fixture = TestBed.createComponent(DeckComponent);
+		fixture = TestBed.createComponent(SpaceSetComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	});

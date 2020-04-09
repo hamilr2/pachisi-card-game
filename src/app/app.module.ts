@@ -14,6 +14,8 @@ import { GoalComponent } from './game/board/goal/goal.component';
 import { DeckComponent } from './game/deck/deck.component';
 import { HandCardComponent } from './game/hand/hand-card/hand-card.component';
 import { PieceComponent } from './game/board/piece/piece.component';
+import { QuartileComponent } from './game/board/quartile/quartile.component';
+import { SpaceSetComponent } from './game/board/quartile/space-set/space-set.component';
 
 
 const routes: Routes = [
@@ -45,7 +47,9 @@ const routes: Routes = [
 		GoalComponent,
 		DeckComponent,
 		HandCardComponent,
-		PieceComponent
+		PieceComponent,
+		QuartileComponent,
+		SpaceSetComponent
 	],
 	imports: [
 		BrowserModule,

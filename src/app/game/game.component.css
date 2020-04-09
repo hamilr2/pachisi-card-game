@@ -1,0 +1,27 @@
+:host {
+	position: relative;
+	background-color:sandybrown;
+	background-image: 
+		repeating-linear-gradient(rgba(0,0,0,.1), rgba(0,0,0,0) 40px),
+		repeating-linear-gradient(45deg, rgba(0,0,0,.4), rgba(0,0,0,0) 40px);
+	display: block;
+	padding: 5px 5px 0px;
+}
+
+.button-wrapper {
+	display: flex;
+	justify-content: center;
+}
+
+.game-info {
+	display:flex;
+	justify-content: center;
+	margin: 5px 0;
+}
+
+.game-info span {
+	border: solid 2px black;
+	background-color: white;
+	font-family: sans-serif;
+	padding: 3px;
+}

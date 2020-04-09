@@ -1,16 +1,37 @@
 <div class="board">
-	<div class="spaceRow" *ngFor="let player of game.players">
-		<app-space *ngFor="let space of player.spaces" [space]="space"></app-space>
+	<div class="quartiles">
+		<app-quartile 
+			[player]="game.players[0]"
+			[rotation]="0"
+		></app-quartile>
+		<app-quartile 
+			[player]="game.players[1]"
+			[rotation]="90"
+		></app-quartile>
+		<app-quartile 
+			[player]="game.players[3]"
+			[rotation]="270"
+		></app-quartile>
+		<app-quartile 
+			[player]="game.players[2]"
+			[rotation]="180"
+		></app-quartile>
 	</div>
-	<div 
-		[ngClass]="{
-			playerRow: true
-		}" *ngFor="let player of game.players">
-		<div class="turnIndicator">
-			<div class="indicator" *ngIf="player === game.activePlayer">></div>
+	<div class="deck-container">
+		<div class="deck draw">
+			<p class="label">Deck</p>
+			<app-card></app-card>
+			<p class="count">Cards: {{ game.deck.length }}</p>
 		</div>
-		<app-home [player]="player"></app-home>
-		<app-goal [player]="player"></app-goal>
-		Cards in hand: {{ player.hand.length }}
+		<div class="deck discard">
+			<p class="label">Discard</p>
+			<app-deck
+				[cards]="game.discard"
+				[visible]="true">
+			</app-deck>
+			<p class="count">Cards: {{ game.discard.length }}</p>
+			
+		</div>
 	</div>
+	
 </div>

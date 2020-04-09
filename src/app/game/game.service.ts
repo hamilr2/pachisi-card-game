@@ -140,7 +140,7 @@ export class GameService {
 	}
 
 	public getMovablePiecesForCard(player: Player, card: Card): CardResult {
-		let errorMessage = '';
+		const errorMessage = '';
 
 		const movablePieces: MovablePiece[] = [];
 		let movementOptions: number[] = [];
@@ -239,7 +239,7 @@ export class GameService {
 			index = currentIndex;
 			while (moves >= MIN_CARD_VALUE) {
 				index--;
-				if (index === -1) {
+				if (index < 0) {
 					index = this.boardSpaces.length - 1;
 				}
 				spacePossibilities[moves] = [this.boardSpaces[index]];

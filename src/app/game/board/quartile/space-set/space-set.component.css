@@ -1,0 +1,47 @@
+.space-set {
+	display: flex;
+}
+
+app-space {
+	margin-right: 10px;
+	position: relative;
+}
+
+app-space::after {
+	display: block;
+	content: '';
+	width: 10px;
+	height: 1px;
+	background-color: white;
+	position: absolute;
+	top: 10px;
+	right: -10px;
+}
+
+.goal-line {
+	position: absolute;
+	display: block;
+	width: 25px;
+	height: 1px;
+	background-color: white;
+	left: -17px;
+	top: 35px;
+	transform: rotate(-45deg);
+}
+
+.space-set.isGoal app-space:first-of-type {
+	position: relative;
+	top: 10px;
+}
+
+.space-set.isGoal app-space:first-of-type:after {
+	transform: rotate(-20deg);
+	width: 12px;
+	top: 4px;
+	z-index: -1;
+}
+
+.space-set.isGoal app-space:last-of-type:after {
+	content: initial;
+	z-index: -1;
+}

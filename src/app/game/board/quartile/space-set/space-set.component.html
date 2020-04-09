@@ -1,0 +1,12 @@
+<!-- <div class="space-set"> -->
+<div
+	[ngClass]="{
+		'space-set': true,
+		isGoal: isGoal
+	}"
+	[ngStyle]="{
+		transform: 'rotate(' + rotation + 'deg)'
+	}">
+	<div *ngIf="isGoal" class="goal-line"></div>
+	<app-space *ngFor="let space of spaces" [space]="space"></app-space>
+</div>

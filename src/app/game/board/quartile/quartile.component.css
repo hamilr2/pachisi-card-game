@@ -1,0 +1,61 @@
+.quartile {
+	position: relative;
+	height: 300px;
+	width: 300px;
+	box-sizing: border-box
+}
+
+.space-set-wrapper {
+	height: 400px;
+	width: 400px;
+	position: relative;
+	box-sizing: border-box;
+	left: -48px;
+	top: -52px;
+}
+
+app-space-set {
+	position: absolute;
+}
+
+app-space-set:nth-of-type(1) {
+	left: 0px;
+	bottom: 25px;
+}
+app-space-set:nth-of-type(2) {
+	left: 53px;
+	bottom: 100px;
+}
+app-space-set:nth-of-type(3) {
+	left: 165px;
+	bottom: 138px;
+}
+app-space-set:nth-of-type(4) {
+	left: 218px;
+	bottom: 245px;
+}
+
+app-goal {
+	position: absolute;
+	left: 36px;
+	bottom: -35px;
+}
+
+app-home {
+	position: absolute;
+	bottom: -150px;
+	left: 14px;
+	transform: rotate(45deg);
+}
+
+.num-cards {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	color: white;
+	width: 125px;
+	height: 125px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}

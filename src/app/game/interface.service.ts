@@ -26,11 +26,11 @@ export class InterfaceService {
 
 	constructor(private game: GameService) {
 		game.update.subscribe(() => { this.onUpdate(); });
-		this.player = game.players[0]; // todo
 		this.onUpdate();
 	}
 
 	onUpdate() {
+		this.player = this.game.players[0]; // todo, should only be necessary for a new game
 		this.discardNecessary = this.isDiscardNecessary(this.player);
 	}
 

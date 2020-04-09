@@ -7,6 +7,8 @@ interface SpaceOptions {
 	player: Player;
 }
 
+let overallCount = 0;
+
 export class Space {
 	isGoal = false;
 	isStart = false;
@@ -14,7 +16,10 @@ export class Space {
 
 	piece: Piece;
 
+	id: number;
+
 	constructor(options: SpaceOptions) {
 		Object.assign(this, options);
+		this.id = overallCount++;
 	}
 }
