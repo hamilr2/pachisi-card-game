@@ -26,6 +26,9 @@ const ACTION_DELAY = 100;
 
 export class GameService {
 
+	gameId: number;
+	location: string;
+
 	deck: Card[];
 	discard: Card[];
 
@@ -108,18 +111,27 @@ export class GameService {
 		this.activePlayer = this.players[(this.turn - 1) % this.players.length];
 	}
 
-	constructor(private storage: StorageService) {
-		const loadedGame = storage.loadGame();
-		if (loadedGame === false) {
-			this.newGame();
-		} else {
-			Object.assign(this, loadedGame);
-			this.buildBoardSpaces();
-		}
-		this.setActivePlayer();
-		this.player = this.players[0];
-		this.majorUpdate.next();
-		this.sendUpdate();
+	constructor(private storage: StorageService) { }
+
+	loadGame(id: number, location: string) {
+		this.location = location;
+		this.gameId = id;
+
+		this.storage.loadGame(id, location).subscribe((loadedGame) => {
+
+			if (loadedGame === false) {
+				this.newGame();
+			} else {
+				Object.assign(this, loadedGame);
+				this.buildBoardSpaces();
+			}
+
+			this.setActivePlayer();
+			this.player = this.players[0];
+			this.save();
+			this.majorUpdate.next();
+			this.sendUpdate();
+		});
 	}
 
 	newGame() {
@@ -142,7 +154,7 @@ export class GameService {
 	}
 
 	save() {
-		this.storage.saveGame(this);
+		this.storage.saveGame(this, this.gameId);
 	}
 
 	getHandSizeForRound() {

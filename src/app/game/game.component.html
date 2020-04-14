@@ -5,11 +5,13 @@
 		(click)="game.advanceRound()"
 	>Advance Round</button>
 </div>
-<div class="game-info"><span>Round {{game.round}}, Turn {{game.turn}}</span></div>
-<app-board (click)="onClick()"></app-board>
-<app-hand 
-	[player]="game.player"
-	[game]="game"
-	[cards]="game.player.hand"
-	[interfaceService]="interfaceService"
-></app-hand>
+<div *ngIf="initialized">
+	<div class="game-info"><span>Round {{game.round}}, Turn {{game.turn}}</span></div>
+	<app-board (click)="onClick()"></app-board>
+	<app-hand 
+		[player]="game.player"
+		[game]="game"
+		[cards]="game.player.hand"
+		[interfaceService]="interfaceService"
+	></app-hand>
+</div>

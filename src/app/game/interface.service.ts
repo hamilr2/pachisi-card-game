@@ -9,6 +9,9 @@ import { MovablePiece } from './interfaces';
 @Injectable()
 
 export class InterfaceService {
+
+	game: GameService;
+
 	activePiece: Piece;
 	activeCard: Card;
 
@@ -24,8 +27,17 @@ export class InterfaceService {
 
 	player: Player;
 
-	constructor(private game: GameService) {
-		game.update.subscribe(() => { this.onUpdate(); });
+	constructor() { }
+
+	setGame(game: GameService) {
+		if (this.game) {
+			this.game.update.unsubscribe();
+		}
+
+		this.game = game;
+		this.game.update.subscribe(() => {
+			this.onUpdate();
+		});
 		this.onUpdate();
 	}
 

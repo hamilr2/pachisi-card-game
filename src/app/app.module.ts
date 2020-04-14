@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
 import { Routes, RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
@@ -16,6 +17,7 @@ import { HandCardComponent } from './game/hand/hand-card/hand-card.component';
 import { PieceComponent } from './game/board/piece/piece.component';
 import { QuartileComponent } from './game/board/quartile/quartile.component';
 import { SpaceSetComponent } from './game/board/quartile/space-set/space-set.component';
+import { LobbyComponent } from './lobby/lobby.component';
 
 
 const routes: Routes = [
@@ -29,9 +31,13 @@ const routes: Routes = [
 		component: GameComponent
 	},
 	{
+		path: 'games/:location/:id/player/:playerId',
+		component: GameComponent,
+	},
+	/*{
 		path: '**',
 		redirectTo: '/'
-	}
+	}*/
 ];
 
 @NgModule({
@@ -49,9 +55,11 @@ const routes: Routes = [
 		HandCardComponent,
 		PieceComponent,
 		QuartileComponent,
-		SpaceSetComponent
+		SpaceSetComponent,
+		LobbyComponent
 	],
 	imports: [
+		HttpClientModule,
 		BrowserModule,
 		RouterModule.forRoot(routes)
 	],

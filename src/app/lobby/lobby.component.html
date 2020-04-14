@@ -1,0 +1,10 @@
+<div class="lobby">
+	<button (click)="onCreateClick()">Create {{ type | titlecase }} Game</button>
+	<div *ngFor="let game of games" class="game" [routerLink]="'/games/' + type + '/' + game.id + '/player/1'">
+		<h2>Game Information:</h2>
+		<p>id: {{ game.id }}</p>
+	</div>
+	<div *ngIf="games.length === 0" class="game">
+		<h2>Create new game</h2>
+	</div>
+</div>

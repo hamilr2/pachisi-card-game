@@ -4,95 +4,115 @@ import { Player } from './game/player.model';
 import { Piece } from './game/piece.model';
 import { Space } from './game/space.model';
 import { GameService } from './game/game.service';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+const firebaseUrl = 'https://dog-card-game.firebaseio.com/';
+
+interface GameInfo {
+	id: number;
+	name: string;
+}
+
+// TODO:
+// interface FlatGame {
+
+// }
 
 @Injectable({
 	providedIn: 'root'
 })
 
 export class StorageService {
-	loadGame(key: string = 'defaultGame'): any | boolean {
 
-		let loadedGame: any;
+	constructor(
+		private http: HttpClient
+	) {}
 
-		try {
-			loadedGame = JSON.parse(window.localStorage.getItem(key));
-		} catch (e) {
-			return false;
-		}
-
-		if (!loadedGame) {
-			return false;
-		}
-
-		const newGame: any = {};
-
-		Object.entries({
-			deck: 'Card',
-			discard: 'Card',
-		}).forEach(([prop, type]) => {
-			if (type === 'Card') {
-				newGame[prop] = loadedGame[prop].map((card: any) => {
-					return new Card(card);
-				});
-			}
-		});
-
-		// Direct copy
-		['round', 'turn', 'hasDiscarded'].forEach(prop => {
-			newGame[prop] = loadedGame[prop];
-		});
-
-		// Early return for incomplete saves
-		if (!loadedGame.flatPlayers) {
-			return newGame;
-		}
-
-		// Init empty-ish Players
-		newGame.players = loadedGame.flatPlayers.map(player => new Player(player));
-
-		// Build initial pieces
-		const pieceList = loadedGame.flatPieces.map((piece: any) => {
-			const newPiece = new Piece(piece);
-			newPiece.player = newGame.players[piece.playerId];
-			return newPiece;
-		});
-
-		// helper function
-		const hydrateSpaces = (flatSpace: any) => {
-			flatSpace.player = newGame.players[flatSpace.playerId];
-			flatSpace.piece = pieceList[flatSpace.pieceId];
-
-			return new Space(flatSpace);
-		};
-
-		const boardSpaces: Space[] = [];
-
-		// Fully hydrate the player
-		newGame.players.forEach((player, index) => {
-			const flatPlayer = loadedGame.flatPlayers[index];
-			player.pieces = flatPlayer.pieceIds.map(pieceId => pieceList[pieceId]);
-			player.home = flatPlayer.homePieceIds.map(pieceId => pieceList[pieceId]);
-			player.goal = flatPlayer.flatGoal.map(hydrateSpaces);
-			player.spaces = flatPlayer.flatSpaces.map(hydrateSpaces);
-			player.hand = flatPlayer.flatHand.map((card: any) => {
-				return new Card(card);
-			});
-			boardSpaces.push(...player.spaces);
-		});
-
-		// Hydrate piece spaces
-		pieceList.forEach((piece) => {
-			if (piece.spaceId !== -1) {
-				piece.space = boardSpaces[piece.spaceId];
-			} else if (piece.goalId !== -1) {
-				piece.space = piece.player.goal[piece.goalId];
-			}
-		});
-
-		return newGame;
+	getKey(gameId: number) {
+		return `game-${gameId}`;
 	}
 
-	saveGame(game: GameService, key: string = 'defaultGame'): any {
+	loadGame(gameId: number, location: string): Observable<any> {
+		let loadedGame: boolean | any;
+
+		if (location === 'local') {
+			loadedGame = this.loadLocalGame(gameId);
+			if (!loadedGame) {
+				return of(false);
+			} else {
+				loadedGame = of(loadedGame);
+			}
+		} else {
+			loadedGame = this.loadRemoteGame(gameId);
+		}
+
+		return loadedGame.pipe(map(game => {
+			if (game !== null) {
+				return this.hydrateGame(game);
+			} else {
+				return false;
+			}
+		}));
+	}
+
+	loadLocalGame(gameId: number) {
+		const key = this.getKey(gameId);
+		return JSON.parse(window.localStorage.getItem(key));
+	}
+
+	getRemoteGameInfos() {
+		return this.http.get<{[key: string]: GameInfo}>(`${firebaseUrl}gameInfos.json`)
+			.pipe(map((gameInfoObjects) => {
+				return Object.values(gameInfoObjects);
+			}));
+	}
+
+	saveRemoteGame(flatGame: any, gameId: number) {
+		this.http.put(`${firebaseUrl}games/${gameId}.json`, flatGame).subscribe();
+		this.http.put(`${firebaseUrl}gameInfos/${gameId}.json`, {
+			id: gameId,
+			name: `Game ${gameId}`
+		}).subscribe();
+	}
+
+	loadRemoteGame(gameId: number) {
+		return this.http.get(`${firebaseUrl}/games/${gameId}.json`);
+	}
+
+	makeFirebaseRequest(path: string = ''): Observable<any> {
+		return this.http.get(`${firebaseUrl}${path}`);
+	}
+
+	saveLocalGame(flatGame: any, gameId: number) {
+		const gameKey = this.getKey(gameId);
+		window.localStorage.setItem(gameKey, JSON.stringify(flatGame));
+
+		const gameInfos = this.getGameInfos();
+		const gameIndex = gameInfos.findIndex(({ id }) => id === gameId);
+
+		if (gameIndex === -1) {
+			gameInfos.push({
+				id: gameId,
+				name: `Game ${gameId}`
+			});
+		}
+
+		this.setGameInfos(gameInfos);
+	}
+
+	saveGame(game: GameService, gameId: number): any {
+		const flatGame = this.flattenGame(game);
+
+		if (game.location === 'local') {
+			this.saveLocalGame(flatGame, gameId);
+		} else {
+			this.saveRemoteGame(flatGame, gameId);
+		}
+	}
+
+	flattenGame(game: GameService) {
 		const { players } = game;
 
 		const propertiesToSaveDirectly = [
@@ -103,9 +123,9 @@ export class StorageService {
 			'turn'
 		];
 
-		const gameToSave: any = {};
+		const flatGame: any = {}; // create a FlatGame
 		propertiesToSaveDirectly.forEach((prop: string) => {
-			gameToSave[prop] = game[prop];
+			flatGame[prop] = game[prop];
 		});
 
 		// build pieces
@@ -171,10 +191,91 @@ export class StorageService {
 			return flatPlayer;
 		});
 
-		gameToSave.flatPlayers = flattenedPlayers;
-		gameToSave.flatPieces = flatPieces;
+		flatGame.flatPlayers = flattenedPlayers;
+		flatGame.flatPieces = flatPieces;
 
-		window.localStorage.setItem(key, JSON.stringify(gameToSave));
+		return flatGame;
+	}
+
+	hydrateGame(flatGame: any) {
+		const newGame: any = {};
+
+		Object.entries({
+			deck: 'Card',
+			discard: 'Card',
+		}).forEach(([prop, type]) => {
+			if (type === 'Card') {
+				if (flatGame[prop]) {
+					newGame[prop] = flatGame[prop].map((card: any) => {
+						return new Card(card);
+					});
+				} else {
+					newGame[prop] = [];
+				}
+			}
+		});
+
+		// Direct copy
+		['round', 'turn', 'hasDiscarded'].forEach(prop => {
+			newGame[prop] = flatGame[prop];
+		});
+
+		// Early return for incomplete saves
+		if (!flatGame.flatPlayers) {
+			return newGame;
+		}
+
+		// Init empty-ish Players
+		newGame.players = flatGame.flatPlayers.map(player => new Player(player));
+
+		// Build initial pieces
+		const pieceList = flatGame.flatPieces.map((piece: any) => {
+			const newPiece = new Piece(piece);
+			newPiece.player = newGame.players[piece.playerId];
+			return newPiece;
+		});
+
+		// helper function
+		const hydrateSpaces = (flatSpace: any) => {
+			flatSpace.player = newGame.players[flatSpace.playerId];
+			flatSpace.piece = pieceList[flatSpace.pieceId];
+
+			return new Space(flatSpace);
+		};
+
+		const boardSpaces: Space[] = [];
+
+		// Fully hydrate the player
+		newGame.players.forEach((player, index) => {
+			const flatPlayer = flatGame.flatPlayers[index];
+			player.pieces = flatPlayer.pieceIds.map(pieceId => pieceList[pieceId]);
+			player.home = flatPlayer.homePieceIds.map(pieceId => pieceList[pieceId]);
+			player.goal = flatPlayer.flatGoal.map(hydrateSpaces);
+			player.spaces = flatPlayer.flatSpaces.map(hydrateSpaces);
+			player.hand = flatPlayer.flatHand.map((card: any) => {
+				return new Card(card);
+			});
+			boardSpaces.push(...player.spaces);
+		});
+
+		// Hydrate piece spaces
+		pieceList.forEach((piece) => {
+			if (piece.spaceId !== -1) {
+				piece.space = boardSpaces[piece.spaceId];
+			} else if (piece.goalId !== -1) {
+				piece.space = piece.player.goal[piece.goalId];
+			}
+		});
+
+		return newGame;
+	}
+
+	setGameInfos(gameInfos: GameInfo[]) {
+		localStorage.setItem('games', JSON.stringify(gameInfos));
+	}
+
+	getGameInfos() {
+		return (JSON.parse(localStorage.getItem('games')) || []) as GameInfo[];
 	}
 }
 
