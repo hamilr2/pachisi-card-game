@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { StorageService } from '../storage.service';
+import { StorageService, GameInfo } from '../storage.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 })
 export class LobbyComponent implements OnInit {
 	@Input() type: string;
-	games: any[] = [];
+	games: GameInfo[] = [];
 
 	constructor(
 		private storage: StorageService,

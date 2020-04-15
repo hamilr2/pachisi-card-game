@@ -147,10 +147,6 @@ export class GameService {
 		this.buildDeck();
 		this.deck = shuffle(this.deck);
 		this.deal();
-		this.setActivePlayer();
-		this.save();
-		this.majorUpdate.next();
-		this.sendUpdate();
 	}
 
 	save() {

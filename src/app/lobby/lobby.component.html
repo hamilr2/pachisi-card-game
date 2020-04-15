@@ -1,10 +1,18 @@
 <div class="lobby">
-	<button (click)="onCreateClick()">Create {{ type | titlecase }} Game</button>
-	<div *ngFor="let game of games" class="game" [routerLink]="'/games/' + type + '/' + game.id + '/player/1'">
-		<h2>Game Information:</h2>
-		<p>id: {{ game.id }}</p>
+	<h2>
+		{{ type | titlecase}} Lobby
+		<button (click)="onCreateClick()">Create {{ type | titlecase }} Game</button>
+	</h2>
+	
+	<div *ngIf="games.length" class="games">
+		<div *ngFor="let game of games" class="game" [routerLink]="'/games/' + type + '/' + game.id + '/player/1'">
+			<h3>{{ game.name }}</h3>
+			<p>Online Players: 0/4</p>
+			<p>Round {{ game.round }}, Turn {{ game.turn}}</p>
+			<p>Last Update: {{ game.lastUpdate | date:'long' }}</p>
+		</div>
 	</div>
-	<div *ngIf="games.length === 0" class="game">
-		<h2>Create new game</h2>
+	<div *ngIf="games.length === 0" class="new-game">
+		<h3>Create new game</h3>
 	</div>
 </div>

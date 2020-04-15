@@ -1,10 +1,4 @@
 <div class="errorMessage" *ngIf="!!interfaceService.errorMessage">{{interfaceService.errorMessage}}</div>
-<div class="button-wrapper">
-	<button (click)="game.newGame()">New Game</button>
-	<button
-		(click)="game.advanceRound()"
-	>Advance Round</button>
-</div>
 <div *ngIf="initialized">
 	<div class="game-info"><span>Round {{game.round}}, Turn {{game.turn}}</span></div>
 	<app-board (click)="onClick()"></app-board>

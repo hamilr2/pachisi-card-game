@@ -10,9 +10,12 @@ import { map } from 'rxjs/operators';
 
 const firebaseUrl = 'https://dog-card-game.firebaseio.com/';
 
-interface GameInfo {
+export interface GameInfo {
 	id: number;
 	name: string;
+	turn: number;
+	round: number;
+	lastUpdate: number;
 }
 
 // TODO:
@@ -62,7 +65,7 @@ export class StorageService {
 		return JSON.parse(window.localStorage.getItem(key));
 	}
 
-	getRemoteGameInfos() {
+	getRemoteGameInfos(): Observable<GameInfo[]> {
 		return this.http.get<{[key: string]: GameInfo}>(`${firebaseUrl}gameInfos.json`)
 			.pipe(map((gameInfoObjects) => {
 				return Object.values(gameInfoObjects);
@@ -73,7 +76,10 @@ export class StorageService {
 		this.http.put(`${firebaseUrl}games/${gameId}.json`, flatGame).subscribe();
 		this.http.put(`${firebaseUrl}gameInfos/${gameId}.json`, {
 			id: gameId,
-			name: `Game ${gameId}`
+			name: `Game ${gameId}`,
+			turn: flatGame.turn,
+			round: flatGame.round,
+			lastUpdate: Date.now()
 		}).subscribe();
 	}
 
@@ -95,7 +101,16 @@ export class StorageService {
 		if (gameIndex === -1) {
 			gameInfos.push({
 				id: gameId,
-				name: `Game ${gameId}`
+				name: `Game ${gameId}`,
+				turn: flatGame.turn,
+				round: flatGame.round,
+				lastUpdate: Date.now()
+			});
+		} else {
+			Object.assign(gameInfos[gameIndex], {
+				turn: flatGame.turn,
+				round: flatGame.round,
+				lastUpdate: Date.now()
 			});
 		}
 
@@ -274,7 +289,7 @@ export class StorageService {
 		localStorage.setItem('games', JSON.stringify(gameInfos));
 	}
 
-	getGameInfos() {
+	getGameInfos(): GameInfo[] {
 		return (JSON.parse(localStorage.getItem('games')) || []) as GameInfo[];
 	}
 }
