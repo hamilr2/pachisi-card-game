@@ -74,9 +74,6 @@ export class GameService {
 	}
 
 	public advanceRound() {
-		/*if (this.hand.length > 0) {
-			this.discard = [...this.discard, ...this.hand];
-		}*/
 		this.round++;
 		this.hasDiscarded = false;
 		this.turn = 1; // 0 for swapping in the future
@@ -85,7 +82,6 @@ export class GameService {
 	}
 
 	advanceTurn() {
-		// if (this.turn === this.getHandSizeForRound() * this.players.length) {
 		// TODO: Fix static reference to this.player
 		this.turn++;
 		this.setActivePlayer();
@@ -95,16 +91,56 @@ export class GameService {
 		}
 		this.hasDiscarded = false;
 		this.save();
-		this.sendUpdate();
+		this.sendUpdate(['advanceTurn']);
 		if (this.activePlayer !== this.player) {
 			this.takeTurnForPlayer(this.activePlayer);
 		}
 	}
 
-	takeTurnForPlayer(player: Player) {
+	getUsableCards(player) {
+		return player.hand.reduce((cards: any[], card: Card) => {
+			const { movablePieces } = this.getMovablePiecesForCard(player, card);
+			if (movablePieces.length) {
+				cards.push({
+					card,
+					movablePieces
+				});
+			}
+			return cards;
+		}, []);
+	}
+
+	delayUI(delayed: () => void) {
 		setTimeout(() => {
-			this.discardCard(player, player.hand[0], true);
+			delayed();
 		}, ACTION_DELAY);
+	}
+
+	takeTurnForPlayer(player: Player) {
+		// Get eligible moves
+		const usableCards = this.getUsableCards(player);
+
+		// check for discard
+		if (!usableCards.length) {
+			this.delayUI(() => {
+				// select least useful card
+				// TODO
+				this.discardCard(player, player.hand[0]);
+				if (this.hasDiscarded) {
+					this.takeTurnForPlayer(player);
+				}
+			});
+			return;
+		}
+
+		// prioritize moves
+		const cardToPlay = usableCards[0].card;
+		const pieceToMove = usableCards[0].movablePieces[0].piece;
+		// if it's a seven or joker, move max spaces
+		const spaceToMoveTo = usableCards[0].movablePieces[0].spaces.slice(-1)[0];
+		this.delayUI(() => {
+			this.playCard(player, cardToPlay, pieceToMove, spaceToMoveTo);
+		});
 	}
 
 	setActivePlayer() {
@@ -113,7 +149,7 @@ export class GameService {
 
 	constructor(private storage: StorageService) { }
 
-	loadGame(id: number, location: string) {
+	loadGame(id: number, location: string, localPlayerId: number) {
 		this.location = location;
 		this.gameId = id;
 
@@ -127,7 +163,7 @@ export class GameService {
 			}
 
 			this.setActivePlayer();
-			this.player = this.players[0];
+			this.player = this.players[localPlayerId];
 			this.save();
 			this.majorUpdate.next();
 			this.sendUpdate();

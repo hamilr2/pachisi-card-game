@@ -31,7 +31,7 @@ const routes: Routes = [
 		component: GameComponent
 	},
 	{
-		path: 'games/:location/:id/player/:playerId',
+		path: 'games/:location/:gameId/player/:playerId',
 		component: GameComponent,
 	},
 	/*{

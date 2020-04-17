@@ -29,12 +29,13 @@ export class InterfaceService {
 
 	constructor() { }
 
-	setGame(game: GameService) {
+	setGame(game: GameService, playerId: number) {
 		if (this.game) {
 			this.game.update.unsubscribe();
 		}
 
 		this.game = game;
+		this.player = this.game.players[playerId];
 		this.game.update.subscribe(() => {
 			this.onUpdate();
 		});
@@ -42,7 +43,6 @@ export class InterfaceService {
 	}
 
 	onUpdate() {
-		this.player = this.game.players[0]; // todo, should only be necessary for a new game
 		this.discardNecessary = this.isDiscardNecessary();
 	}
 

@@ -11,7 +11,8 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class GameComponent implements OnInit {
 
-	id: number;
+	gameId: number;
+	playerId: number;
 	location: string;
 	initialized = false;
 
@@ -22,13 +23,14 @@ export class GameComponent implements OnInit {
 	) { }
 
 	ngOnInit(): void {
-		this.id = Number(this.route.snapshot.params.id);
+		this.gameId = Number(this.route.snapshot.params.gameId);
 		this.location = this.route.snapshot.params.location;
+		this.playerId = Number(this.route.snapshot.params.playerId) - 1; // actual id is array indexed
 		this.game.majorUpdate.subscribe(() => {
 			this.initialized = true;
-			this.interfaceService.setGame(this.game);
+			this.interfaceService.setGame(this.game, this.playerId);
 		});
-		this.game.loadGame(this.id, this.location);
+		this.game.loadGame(this.gameId, this.location, this.playerId);
 	}
 
 	onClick() {
