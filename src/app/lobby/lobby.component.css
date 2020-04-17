@@ -3,6 +3,32 @@
 	font-family: sans-serif;
 }
 
+button {
+	height: 30px;
+	box-sizing: border-box;
+	border: solid 1px rgba(0,0,127);
+	color: rgba(0,0,127);
+	border-radius: 10px;
+	line-height: 28px;
+	background-color: transparent;
+	cursor: pointer;
+	outline: none;
+}
+
+button:hover,
+button:focus {
+	background-color: rgba(0,0,127,.05);
+}
+
+button:active {
+	background-color: rgba(0,0,127);
+	color: white;
+}
+
+h2 {
+	line-height: 30px;
+}
+
 h2 button {
 	float: right;
 }
@@ -21,10 +47,16 @@ h2 button {
 .lobby .game {
 	padding: 20px;
 	cursor: pointer;
+	outline: none;
 }
 
-.lobby .game:hover {
+.lobby .game:hover,
+.lobby .game:focus {
 	background-color: rgba(0,0,255,.05);
+}
+
+.lobby .game:active {
+	background-color: rgba(0,0,255,.2);
 }
 
 .lobby .game h3 {
@@ -37,4 +69,14 @@ h2 button {
 
 .lobby .game:not(:last-of-type) {
 	border-bottom: solid 1px black;
+}
+
+.lobby .game:first-of-type {
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+}
+
+.lobby .game:last-of-type {
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
 }
