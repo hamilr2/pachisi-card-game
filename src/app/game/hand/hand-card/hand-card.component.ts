@@ -22,6 +22,10 @@ export class HandCardComponent implements OnInit {
 		return this.interfaceService.activeCard === this.card;
 	}
 
+	isPlayDisabled() {
+		return this.isBeingPlayed() || this.game.activePlayer !== this.game.player;
+	}
+
 	isPlayable() {
 		// Consider adjusting this to the hand
 		const player: Player = this.interfaceService.player;

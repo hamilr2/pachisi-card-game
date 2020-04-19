@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { GameService } from './game.service';
+import { GameService, GameLogItem } from './game.service';
 import { InterfaceService } from './interface.service';
 import { ActivatedRoute } from '@angular/router';
 
@@ -15,6 +15,8 @@ export class GameComponent implements OnInit {
 	playerId: number;
 	location: string;
 	initialized = false;
+	status: string;
+	lastAction: string;
 
 	constructor(
 		public game: GameService,
@@ -30,7 +32,31 @@ export class GameComponent implements OnInit {
 			this.initialized = true;
 			this.interfaceService.setGame(this.game, this.playerId);
 		});
+		this.game.update.subscribe(() => {
+			console.log('new update');
+			if (this.game.activePlayer === this.game.player) {
+				this.status = 'It is your turn';
+			} else {
+				this.status = `${this.game.activePlayer.name} is playing`;
+			}
+			this.buildLastAction(this.game.log.slice(-1)[0]);
+		});
 		this.game.loadGame(this.gameId, this.location, this.playerId);
+	}
+
+	buildLastAction(item: GameLogItem) {
+		if (!item) {
+			return;
+		}
+		const { player, card, action } = item;
+		if (item.action === 'play') {
+			this.lastAction = `${player.name} played a ${card.symbol}`;
+		} else if (action.includes('discard')) {
+			this.lastAction = `${player.name} discarded a ${card.symbol}`;
+			if (action === 'discardAndDraw') {
+				this.lastAction = `${this.lastAction} and drew a new card`;
+			}
+		}
 	}
 
 	onClick() {

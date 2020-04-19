@@ -1,0 +1,16 @@
+<div [ngClass]="['player-corner', corner, game.activePlayer === player ? 'active' : '']">
+	<div class="border-container">
+		<div class="player-info">
+			<div class="name-row">
+				<div class="player-color" [ngStyle]="{
+					'background-color': player.color
+				}"></div>
+				<span class="player-name">{{ player.name }}</span>
+				<span class="player-online-status"> ({{ player.onlineStatus | titlecase }})</span>
+			</div>
+			<div class="hand-row">
+				Cards in hand: {{ player.hand.length }}
+			</div>
+		</div>
+	</div>
+</div>

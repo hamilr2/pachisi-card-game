@@ -18,6 +18,7 @@ import { PieceComponent } from './game/board/piece/piece.component';
 import { QuartileComponent } from './game/board/quartile/quartile.component';
 import { SpaceSetComponent } from './game/board/quartile/space-set/space-set.component';
 import { LobbyComponent } from './lobby/lobby.component';
+import { PlayerCornerComponent } from './game/player-corner/player-corner.component';
 
 
 const routes: Routes = [
@@ -56,7 +57,8 @@ const routes: Routes = [
 		PieceComponent,
 		QuartileComponent,
 		SpaceSetComponent,
-		LobbyComponent
+		LobbyComponent,
+		PlayerCornerComponent
 	],
 	imports: [
 		HttpClientModule,

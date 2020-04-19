@@ -2,13 +2,14 @@ import { Piece } from './piece.model';
 import { Card } from './card.model';
 import { Space } from './space.model';
 
-const NUMBER_OF_PIECES = 5;
+const NUMBER_OF_PIECES = 4;
 const GOAL_SIZE = 4;
 const SPACES_PER_PLAYER = 16;
 
 interface PlayerOptions {
 	color: string;
 	id: number;
+	name: string;
 }
 
 export class Player {
@@ -17,8 +18,10 @@ export class Player {
 	hand: Card[] = [];
 	home: Piece[] = [];
 	id: number;
+	name: string;
 	pieces: Piece[] = [];
 	spaces: Space[] = [];
+	onlineStatus = 'bot';
 
 	constructor(options: PlayerOptions) {
 		Object.assign(this, options);

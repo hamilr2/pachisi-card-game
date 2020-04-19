@@ -14,8 +14,9 @@
 	justify-content: center;
 }
 
-.game-info {
-	display:flex;
+.main-info,
+.last-action {
+	display: flex;
 	justify-content: center;
 	margin: 5px 0;
 }
@@ -25,4 +26,12 @@
 	background-color: white;
 	font-family: sans-serif;
 	padding: 3px;
+}
+
+.last-action {
+	font-size: 12px;
+}
+
+.last-action .label {
+	font-weight: 600;
 }

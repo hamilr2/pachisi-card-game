@@ -1,6 +1,19 @@
 <div class="errorMessage" *ngIf="!!interfaceService.errorMessage">{{interfaceService.errorMessage}}</div>
 <div *ngIf="initialized">
-	<div class="game-info"><span>Round {{game.round}}, Turn {{game.turn}}</span></div>
+	<div class="game-info">
+		<div class="main-info">
+			<span>
+				Round {{game.round}}, Turn {{game.turn}}
+			</span>
+			<span>
+				{{ status }}
+			</span>
+		</div>
+		<div class="last-action">
+			<span class="label">Last Action: </span>
+			<span>{{ lastAction }}</span>
+		</div>
+	</div>
 	<app-board (click)="onClick()"></app-board>
 	<app-hand 
 		[player]="game.player"

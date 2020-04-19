@@ -10,7 +10,7 @@
 		<button
 			*ngIf="isPlayable()"
 			(click)="onClickPlay($event)"
-			[disabled]="isBeingPlayed()"
+			[disabled]="isPlayDisabled()"
 		>{{ isBeingPlayed() ? 'Playing' : 'Play' }}</button>
 		<button 
 			*ngIf="interfaceService.discardNecessary"

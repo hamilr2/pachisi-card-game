@@ -18,9 +18,15 @@ const shuffle = (items: Array<any>) => {
 	}).map(({value}) => value );
 };
 
+export interface GameLogItem {
+	player?: Player;
+	action: string;
+	card?: Card;
+}
+
 const HAND_SIZE = 6;
 const DEFAULT_CARD_QUANTITY = 8;
-const ACTION_DELAY = 100;
+const ACTION_DELAY = 1000;
 
 @Injectable()
 
@@ -28,6 +34,8 @@ export class GameService {
 
 	gameId: number;
 	location: string;
+
+	log: GameLogItem[] = [];
 
 	deck: Card[];
 	discard: Card[];
@@ -52,10 +60,6 @@ export class GameService {
 	}
 
 	deal() {
-		if (this.deck.length === 0) {
-			alert('Deck is empty!');
-			return false;
-		}
 		this.players.forEach((player: Player) => {
 			player.hand = [];
 			for (let i = 0; i < this.getHandSizeForRound() && this.deck.length > 0; i++) {
@@ -79,6 +83,7 @@ export class GameService {
 		this.turn = 1; // 0 for swapping in the future
 		this.deal();
 		this.save();
+		this.sendUpdate(['advanceTurn', 'advanceRound']);
 	}
 
 	advanceTurn() {
@@ -92,7 +97,7 @@ export class GameService {
 		this.hasDiscarded = false;
 		this.save();
 		this.sendUpdate(['advanceTurn']);
-		if (this.activePlayer !== this.player) {
+		if (this.activePlayer.onlineStatus === 'bot') {
 			this.takeTurnForPlayer(this.activePlayer);
 		}
 	}
@@ -162,11 +167,21 @@ export class GameService {
 				this.buildBoardSpaces();
 			}
 
-			this.setActivePlayer();
 			this.player = this.players[localPlayerId];
+			this.player.onlineStatus = 'you';
+			this.players.forEach(player => {
+				if (player !== this.player && player.onlineStatus === 'you') {
+					player.onlineStatus = this.location === 'local' ? 'bot' : 'offline';
+				}
+			});
+			this.setActivePlayer();
 			this.save();
 			this.majorUpdate.next();
-			this.sendUpdate();
+			this.sendUpdate(['gameLoaded']);
+
+			if (this.activePlayer.onlineStatus === 'bot') {
+				this.takeTurnForPlayer(this.activePlayer);
+			}
 		});
 	}
 
@@ -178,6 +193,7 @@ export class GameService {
 
 		this.buildPlayers();
 		this.player = this.players[0];
+		this.player.onlineStatus = 'you';
 		this.buildBoardSpaces();
 
 		this.buildDeck();
@@ -335,6 +351,12 @@ export class GameService {
 			return false;
 		}
 
+		this.log.push({
+			player,
+			card,
+			action: 'play'
+		});
+
 		player.hand = player.hand.filter((thisCard: Card) => thisCard !== card);
 		this.discard.push(card);
 		this.advanceTurn();
@@ -343,12 +365,23 @@ export class GameService {
 
 	public discardCard(player: Player, card: Card, forceDiscard = false): void {
 		player.hand = player.hand.filter((thisCard: Card) => thisCard !== card);
+
 		this.discard.push(card);
 		if (this.hasDiscarded || forceDiscard) {
+			this.log.push({
+				player,
+				card,
+				action: 'discard'
+			});
 			this.advanceTurn();
 		} else {
 			this.hasDiscarded = true;
 			player.hand.push(this.drawCard());
+			this.log.push({
+				player,
+				card,
+				action: 'discardAndDraw'
+			});
 			this.save();
 			this.sendUpdate();
 		}
@@ -357,10 +390,12 @@ export class GameService {
 	buildPlayers(numberOfPlayers: number = 4) {
 		this.players = [];
 		const colors = ['red', 'green', 'blue', 'yellow', 'orange', 'purple'];
+		const names = ['Red', 'Green', 'Blue', 'Yellow', 'Orange', 'Purple'];
 		for (let i = 0; i < numberOfPlayers; i++) {
 			this.players.push(new Player({
 				color: colors[i],
-				id: i
+				id: i,
+				name: names[i]
 			}));
 		}
 	}

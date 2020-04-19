@@ -1,0 +1,78 @@
+.player-corner {
+	position: absolute;
+	height: 55px;
+	width: 200px;
+	overflow: hidden;
+}
+
+.border-container {
+	position: relative;
+	height: 100%;
+}
+
+.player-info {
+	position: absolute;
+	background-color: rgba(255,255,255,.8);
+	border: solid 1px black;
+	padding: 5px;
+	font-family: sans-serif;
+	box-sizing: border-box;
+	height: 45px;
+}
+
+.player-corner.active .player-info {
+	background-color: rgba(200, 200, 255,.9);
+	box-shadow: 0px 0px 5px 5px purple;
+}
+
+.bottom-left,
+.bottom-left .player-info {
+	border-top-right-radius: 10px;
+	bottom: 0px;
+	left: 0px;
+}
+
+.top-left,
+.top-left .player-info {
+	border-bottom-right-radius: 10px;
+	top: 0px;
+	left: 0px;
+}
+
+.top-right,
+.top-right .player-info {
+	border-bottom-left-radius: 10px;
+	top: 0px;
+	right: 0px;
+}
+
+.bottom-right,
+.bottom-right .player-info {
+	border-top-left-radius: 10px;
+	bottom: 0px;
+	right: 0px;
+}
+
+.name-row {
+	line-height: 16px;
+	margin-bottom: 4px;
+}
+
+.player-name {
+	font-weight: 600;
+}
+
+.player-color {
+	display: inline-block;
+	height: 16px;
+	width: 16px;
+	border-radius: 8px;
+	border: solid 1px black;
+	box-sizing: border-box;
+	margin-right: 4px;
+	vertical-align: bottom;
+}
+
+.hand-row {
+	font-size: 10px;
+}
