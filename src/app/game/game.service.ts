@@ -1,11 +1,12 @@
 import { Card } from './card.model';
-import { Injectable, Output } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { StorageService } from '../storage.service';
 import { Space } from './space.model';
 import { Player } from './player.model';
 import { Piece } from './piece.model';
 import { CardResult, MovablePiece } from './interfaces';
 import { Subject } from 'rxjs';
+import { LiveService } from '../live.service';
 
 const shuffle = (items: Array<any>) => {
 	return items.map(item => {
@@ -22,11 +23,24 @@ export interface GameLogItem {
 	player?: Player;
 	action: string;
 	card?: Card;
+	piece?: Piece;
+	space?: Space;
+	cards?: Card[];
+}
+
+export interface FlatGameLogItem {
+	playerId?: number;
+	action: string;
+	cardId?: number;
+	pieceId?: number;
+	spaceId?: number;
+	cardIds?: number[];
 }
 
 const HAND_SIZE = 6;
 const DEFAULT_CARD_QUANTITY = 8;
 const ACTION_DELAY = 1000;
+export const NUMBER_OF_PLAYERS = 4;
 
 @Injectable()
 
@@ -37,20 +51,26 @@ export class GameService {
 
 	log: GameLogItem[] = [];
 
+	// storage / access
+	cards: Card[];
+	pieces: Piece[];
+	spaces: Space[]; // includes main board + goal, but not home "spaces"
+	players: Player[];
+
+	// game items
+	boardSpaces: Space[]; // only non-goal spaces!!
+	player: Player;
 	deck: Card[];
 	discard: Card[];
 
-	boardSpaces: Space[];
-	players: Player[];
-	player: Player;
-
-	hasDiscarded: boolean;
+	// State
 	round: number;
 	turn: number;
 	activePlayer: Player;
+	hasDiscarded: boolean;
 
+	// Events for components
 	updates: string[] = [];
-
 	update = new Subject<string[]>();
 	majorUpdate = new Subject<void>();
 
@@ -122,6 +142,9 @@ export class GameService {
 	}
 
 	takeTurnForPlayer(player: Player) {
+		if (!this.player.host) {
+			return;
+		}
 		// Get eligible moves
 		const usableCards = this.getUsableCards(player);
 
@@ -152,11 +175,19 @@ export class GameService {
 		this.activePlayer = this.players[(this.turn - 1) % this.players.length];
 	}
 
-	constructor(private storage: StorageService) { }
+	constructor(
+		private storage: StorageService,
+		private live: LiveService
+	) { }
 
 	loadGame(id: number, location: string, localPlayerId: number) {
 		this.location = location;
 		this.gameId = id;
+
+		if (this.location === 'remote') {
+			this.live.openConnection(this.gameId);
+			this.live.incomingMessage.subscribe(this.handleMessage.bind(this));
+		}
 
 		this.storage.loadGame(id, location).subscribe((loadedGame) => {
 
@@ -179,6 +210,13 @@ export class GameService {
 			this.majorUpdate.next();
 			this.sendUpdate(['gameLoaded']);
 
+			if (this.location === 'remote') {
+				this.sendAction({
+					action: 'join',
+					player: this.player
+				});
+			}
+
 			if (this.activePlayer.onlineStatus === 'bot') {
 				this.takeTurnForPlayer(this.activePlayer);
 			}
@@ -194,15 +232,26 @@ export class GameService {
 		this.buildPlayers();
 		this.player = this.players[0];
 		this.player.onlineStatus = 'you';
+		this.player.host = true;
 		this.buildBoardSpaces();
 
+		this.pieces = [];
+		this.spaces = [];
+		this.players.forEach(({ pieces, spaces, goal}) => {
+			this.pieces = [...this.pieces, ...pieces];
+			this.spaces = [...this.spaces, ...spaces, ...goal];
+		}, []);
+
 		this.buildDeck();
+		this.cards = [...this.deck];
 		this.deck = shuffle(this.deck);
 		this.deal();
 	}
 
 	save() {
-		this.storage.saveGame(this, this.gameId);
+		if (this.location === 'local' || this.player.host) {
+			this.storage.saveGame(this, this.gameId);
+		}
 	}
 
 	getHandSizeForRound() {
@@ -320,8 +369,21 @@ export class GameService {
 		}
 	}
 
-	public playCard(player: Player, card: Card, piece?: Piece, space?: Space): boolean {
+	public playCard(player: Player, card: Card, piece?: Piece, space?: Space) {
+		if (this.location === 'local') {
+			this.executePlayCard(player, card, piece, space);
+		} else {
+			this.sendAction({
+				action: 'play',
+				player,
+				card,
+				piece,
+				space
+			});
+		}
+	}
 
+	executePlayCard(player: Player, card: Card, piece?: Piece, space?: Space) {
 		let errorMessage = '';
 
 		if (card.startable && !piece.space) {
@@ -364,6 +426,19 @@ export class GameService {
 	}
 
 	public discardCard(player: Player, card: Card, forceDiscard = false): void {
+		console.log('Discard Card');
+		if (this.location === 'local') {
+			this.executeDiscardCard(player, card, forceDiscard);
+		} else {
+			this.sendAction({
+				action: this.hasDiscarded ? 'discard' : 'discardAndDraw',
+				player,
+				card
+			});
+		}
+	}
+
+	executeDiscardCard(player: Player, card: Card, forceDiscard = false): void {
 		player.hand = player.hand.filter((thisCard: Card) => thisCard !== card);
 
 		this.discard.push(card);
@@ -439,8 +514,15 @@ export class GameService {
 			}
 		];
 
+		let id = 0;
+
 		this.deck = cards.reduce((deck, card) => {
-			deck = [...deck, ...Array(card.quantity || DEFAULT_CARD_QUANTITY).fill({}).map(() => new Card(card))];
+			deck = [...deck, ...Array(card.quantity || DEFAULT_CARD_QUANTITY).fill({}).map(() => {
+				return new Card({
+					...card,
+					id: id++
+				});
+			})];
 			return deck;
 		}, []);
 	}
@@ -451,4 +533,49 @@ export class GameService {
 			this.boardSpaces.push(...player.spaces);
 		});
 	}
+
+	sendAction(item: GameLogItem) {
+		this.storage.sendLogItem(item, this.gameId);
+	}
+
+	handleMessage(flatItem: FlatGameLogItem) {
+		const item = this.hydrateGameLogItem(flatItem);
+
+		if (item.action === 'play') {
+			this.executePlayCard(item.player, item.card, item.piece, item.space);
+		} else if (item.action === 'discard' || item.action === 'discardAndDraw') {
+			this.executeDiscardCard(item.player, item.card);
+			if (this.hasDiscarded && item.player.onlineStatus === 'bot') {
+				this.takeTurnForPlayer(item.player);
+			}
+		} else if (item.action === 'join') {
+			item.player.onlineStatus = 'online';
+			this.save();
+		}
+	}
+
+	hydrateGameLogItem(flatItem: FlatGameLogItem): GameLogItem {
+		const item: GameLogItem = {
+			action: flatItem.action
+		};
+
+		if (flatItem.cardId !== undefined) {
+			item.card = this.cards.find(card => card.id === flatItem.cardId);
+		}
+
+		if (flatItem.playerId !== undefined) {
+			item.player = this.players.find(player => player.id === flatItem.playerId);
+		}
+
+		if (flatItem.pieceId !== undefined) {
+			item.piece = this.pieces.find(piece => piece.id === flatItem.pieceId);
+		}
+
+		if (flatItem.spaceId !== undefined) {
+			item.space = this.spaces.find(space => space.id === flatItem.spaceId);
+		}
+
+		return item;
+	}
+
 }

@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { GameService, GameLogItem } from './game.service';
 import { InterfaceService } from './interface.service';
 import { ActivatedRoute } from '@angular/router';
+import { LiveService } from '../live.service';
 
 @Component({
 	selector: 'app-game',
@@ -9,7 +10,7 @@ import { ActivatedRoute } from '@angular/router';
 	styleUrls: ['./game.component.css'],
 	providers: [GameService, InterfaceService]
 })
-export class GameComponent implements OnInit {
+export class GameComponent implements OnInit, OnDestroy {
 
 	gameId: number;
 	playerId: number;
@@ -21,7 +22,8 @@ export class GameComponent implements OnInit {
 	constructor(
 		public game: GameService,
 		public interfaceService: InterfaceService,
-		private route: ActivatedRoute
+		private route: ActivatedRoute,
+		private live: LiveService
 	) { }
 
 	ngOnInit(): void {
@@ -33,7 +35,6 @@ export class GameComponent implements OnInit {
 			this.interfaceService.setGame(this.game, this.playerId);
 		});
 		this.game.update.subscribe(() => {
-			console.log('new update');
 			if (this.game.activePlayer === this.game.player) {
 				this.status = 'It is your turn';
 			} else {
@@ -63,4 +64,7 @@ export class GameComponent implements OnInit {
 		this.interfaceService.reset();
 	}
 
+	ngOnDestroy() {
+		this.live.closeAllConnections();
+	}
 }

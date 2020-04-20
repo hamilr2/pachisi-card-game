@@ -1,5 +1,6 @@
 
 interface CardOptions {
+	id?: number;
 	basic?: boolean;
 	color?: string;
 	special?: string;
@@ -10,6 +11,7 @@ interface CardOptions {
 }
 
 export class Card {
+	id: number;
 	basic = false;
 	color = 'blue';
 	special: string;
