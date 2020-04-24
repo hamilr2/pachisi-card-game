@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { GameService, GameLogItem } from './game.service';
+import { GameService } from './game.service';
 import { InterfaceService } from './interface.service';
 import { ActivatedRoute } from '@angular/router';
 import { LiveService } from '../live.service';
+import { GameLogItem } from './game-log-item.interface';
 
 @Component({
 	selector: 'app-game',

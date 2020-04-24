@@ -1,4 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { Routes, RouterModule } from '@angular/router';
@@ -19,6 +20,8 @@ import { QuartileComponent } from './game/board/quartile/quartile.component';
 import { SpaceSetComponent } from './game/board/quartile/space-set/space-set.component';
 import { LobbyComponent } from './lobby/lobby.component';
 import { PlayerCornerComponent } from './game/player-corner/player-corner.component';
+import { AnimatedCardComponent } from './game/board/animations/animated-card/animated-card.component';
+import { AnimationsComponent } from './game/board/animations/animations.component';
 
 
 const routes: Routes = [
@@ -58,11 +61,14 @@ const routes: Routes = [
 		QuartileComponent,
 		SpaceSetComponent,
 		LobbyComponent,
-		PlayerCornerComponent
+		PlayerCornerComponent,
+		AnimatedCardComponent,
+		AnimationsComponent
 	],
 	imports: [
 		HttpClientModule,
 		BrowserModule,
+		BrowserAnimationsModule,
 		RouterModule.forRoot(routes)
 	],
 	providers: [],

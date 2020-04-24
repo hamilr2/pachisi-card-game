@@ -1,0 +1,7 @@
+<div class="card-animation-parent">
+	<app-animated-card
+		*ngFor="let animatedCard of animatedCards"
+		[animatedCard]="animatedCard"
+		(done)="onDone(animatedCard)"
+	></app-animated-card>
+</div>

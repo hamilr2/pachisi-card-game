@@ -3,11 +3,12 @@ import { Injectable } from '@angular/core';
 import { Player, FlatPlayer } from './game/player.model';
 import { Piece, FlatPiece } from './game/piece.model';
 import { Space, FlatSpace, SpaceOptions } from './game/space.model';
-import { GameService, GameLogItem, FlatGameLogItem } from './game/game.service';
+import { GameService } from './game/game.service';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { GameLogItem, FlatGameLogItem } from './game/game-log-item.interface';
 
 const firebaseUrl = environment.firebaseUrl;
 

@@ -7,39 +7,12 @@ import { Piece } from './piece.model';
 import { CardResult, MovablePiece } from './interfaces';
 import { Subject } from 'rxjs';
 import { LiveService } from '../live.service';
-
-const shuffle = (items: Array<any>) => {
-	return items.map(item => {
-		return {
-			value: item,
-			rand: Math.random()
-		};
-	}).sort(({rand: randA}, { rand: randB}) => {
-		return randA - randB;
-	}).map(({value}) => value );
-};
-
-export interface GameLogItem {
-	player?: Player;
-	action: string;
-	card?: Card;
-	piece?: Piece;
-	space?: Space;
-	cards?: Card[];
-}
-
-export interface FlatGameLogItem {
-	playerId?: number;
-	action: string;
-	cardId?: number;
-	pieceId?: number;
-	spaceId?: number;
-	cardIds?: number[];
-}
+import { GameLogItem, GameLogActions, FlatGameLogItem } from './game-log-item.interface';
+import * as DogUtil from '../util.util';
 
 const HAND_SIZE = 6;
 const DEFAULT_CARD_QUANTITY = 8;
-const ACTION_DELAY = 1000;
+const ACTION_DELAY = 3500;
 export const NUMBER_OF_PLAYERS = 4;
 
 @Injectable()
@@ -72,6 +45,7 @@ export class GameService {
 	// Events for components
 	updates: string[] = [];
 	update = new Subject<string[]>();
+	actionSubject = new Subject<GameLogItem>();
 	majorUpdate = new Subject<void>();
 
 	sendUpdate(updates: string[] = []) {
@@ -92,7 +66,7 @@ export class GameService {
 		if (this.deck.length === 0) {
 			this.deck = this.discard;
 			this.discard = [];
-			shuffle(this.deck);
+			DogUtil.shuffle(this.deck);
 		}
 		return this.deck.shift();
 	}
@@ -244,7 +218,7 @@ export class GameService {
 
 		this.buildDeck();
 		this.cards = [...this.deck];
-		this.deck = shuffle(this.deck);
+		this.deck = DogUtil.shuffle(this.deck);
 		this.deal();
 	}
 
@@ -374,7 +348,7 @@ export class GameService {
 			this.executePlayCard(player, card, piece, space);
 		} else {
 			this.sendAction({
-				action: 'play',
+				action: GameLogActions.PLAY,
 				player,
 				card,
 				piece,
@@ -413,10 +387,10 @@ export class GameService {
 			return false;
 		}
 
-		this.log.push({
+		this.logAction({
 			player,
 			card,
-			action: 'play'
+			action: GameLogActions.PLAY
 		});
 
 		player.hand = player.hand.filter((thisCard: Card) => thisCard !== card);
@@ -431,7 +405,7 @@ export class GameService {
 			this.executeDiscardCard(player, card, forceDiscard);
 		} else {
 			this.sendAction({
-				action: this.hasDiscarded ? 'discard' : 'discardAndDraw',
+				action: this.hasDiscarded ? GameLogActions.DISCARD : GameLogActions.DISCARD_DRAW,
 				player,
 				card
 			});
@@ -443,19 +417,19 @@ export class GameService {
 
 		this.discard.push(card);
 		if (this.hasDiscarded || forceDiscard) {
-			this.log.push({
+			this.logAction({
 				player,
 				card,
-				action: 'discard'
+				action: GameLogActions.DISCARD
 			});
 			this.advanceTurn();
 		} else {
 			this.hasDiscarded = true;
 			player.hand.push(this.drawCard());
-			this.log.push({
+			this.logAction({
 				player,
 				card,
-				action: 'discardAndDraw'
+				action: GameLogActions.DISCARD_DRAW
 			});
 			this.save();
 			this.sendUpdate();
@@ -538,12 +512,17 @@ export class GameService {
 		this.storage.sendLogItem(item, this.gameId);
 	}
 
+	logAction(item: GameLogItem) {
+		this.log.push(item);
+		this.actionSubject.next(item);
+	}
+
 	handleMessage(flatItem: FlatGameLogItem) {
 		const item = this.hydrateGameLogItem(flatItem);
 
-		if (item.action === 'play') {
+		if (item.action === GameLogActions.PLAY) {
 			this.executePlayCard(item.player, item.card, item.piece, item.space);
-		} else if (item.action === 'discard' || item.action === 'discardAndDraw') {
+		} else if (item.action === GameLogActions.DISCARD || item.action === GameLogActions.DISCARD_DRAW) {
 			this.executeDiscardCard(item.player, item.card);
 			if (this.hasDiscarded && item.player.onlineStatus === 'bot') {
 				this.takeTurnForPlayer(item.player);

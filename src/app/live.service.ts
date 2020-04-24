@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { FlatGameLogItem, GameLogItem } from './game/game.service';
 import { Subject } from 'rxjs';
+import { FlatGameLogItem } from './game/game-log-item.interface';
 
 const firebaseUrl = environment.firebaseUrl;
 

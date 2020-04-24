@@ -1,0 +1,5 @@
+<app-card
+	[card]="animatedCard.card"
+	[@cardAnimation]="cardState"
+	(@cardAnimation.done)="onDone($event)"
+></app-card>
