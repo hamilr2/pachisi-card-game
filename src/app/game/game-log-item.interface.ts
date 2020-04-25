@@ -6,7 +6,11 @@ import { Space } from './space.model';
 export const GameLogActions = {
 	DISCARD: 'discard',
 	DISCARD_DRAW: 'discardAndDraw',
-	PLAY: 'play'
+	PLAY: 'play',
+	SHUFFLE: 'shuffle',
+	JOIN: 'join',
+	DEAL: 'deal',
+	ADVANCE_ROUND: 'advanceRound'
 };
 
 export interface GameLogItem {

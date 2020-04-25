@@ -27,7 +27,7 @@ export class LiveService {
 
 	handleEvent(event: MessageEvent) {
 		const eventData = JSON.parse(event.data);
-		console.log('EventSource', event.type, eventData);
+		//console.log('EventSource', event.type, eventData);
 
 		if (eventData.data	) {
 			this.incomingMessage.next(eventData.data as FlatGameLogItem);

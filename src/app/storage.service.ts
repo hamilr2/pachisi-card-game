@@ -151,10 +151,12 @@ export class StorageService {
 		};
 
 		Object.entries(item).forEach(([key, value]) => {
-			if (key === 'cards') {
-				newItem.cardIds = value.map((card: Card) => card.id);
-			} else if (key !== 'action') {
-				newItem[key + 'Id'] = value.id;
+			if (!!value) {
+				if (key === 'cards') {
+					newItem.cardIds = value.map((card: Card) => card.id);
+				} else if (key !== 'action') {
+					newItem[key + 'Id'] = value.id;
+				}
 			}
 		});
 
@@ -229,7 +231,7 @@ export class StorageService {
 
 		newGame.pieces.forEach((piece, pieceIndex) => {
 			const { spaceId, playerId } = flatPieces[pieceIndex];
-			piece.space = Number(spaceId) ? newGame.spaces.find(space => space.id === spaceId) : null;
+			piece.space = !isNaN(Number(spaceId)) ? newGame.spaces.find(space => space.id === spaceId) : null;
 			piece.player = newGame.players.find(player => player.id === playerId);
 		});
 

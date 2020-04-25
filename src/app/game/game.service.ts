@@ -21,6 +21,7 @@ export class GameService {
 
 	gameId: number;
 	location: string;
+	isLoaded = false;
 
 	log: GameLogItem[] = [];
 
@@ -71,7 +72,32 @@ export class GameService {
 		return this.deck.shift();
 	}
 
-	public advanceRound() {
+	shuffleDiscardIntoDeck() {
+		this.deck = DogUtil.shuffle([...this.deck, ...this.discard]);
+		this.discard = [];
+		this.sendAction({
+			action: GameLogActions.SHUFFLE,
+			cards: this.deck
+		});
+	}
+
+	advanceRound() {
+		const shuffle = this.deck.length < this.getHandSizeForRound() * this.players.length;
+		if (shuffle) {
+			this.deck = [...this.deck, ...this.discard];
+		}
+
+		if (this.location === 'local') {
+			this.executeAdvanceRound();
+		} else {
+			this.sendAction({
+				action: GameLogActions.ADVANCE_ROUND,
+				cards: shuffle ? this.deck : undefined
+			});
+		}
+	}
+
+	executeAdvanceRound() {
 		this.round++;
 		this.hasDiscarded = false;
 		this.turn = 1; // 0 for swapping in the future
@@ -81,11 +107,12 @@ export class GameService {
 	}
 
 	advanceTurn() {
-		// TODO: Fix static reference to this.player
 		this.turn++;
 		this.setActivePlayer();
 		if (this.activePlayer.hand.length === 0) {
-			this.advanceRound();
+			if (this.player.host) {
+				this.advanceRound();
+			}
 			return;
 		}
 		this.hasDiscarded = false;
@@ -157,6 +184,7 @@ export class GameService {
 	loadGame(id: number, location: string, localPlayerId: number) {
 		this.location = location;
 		this.gameId = id;
+		this.isLoaded = false;
 
 		if (this.location === 'remote') {
 			this.live.openConnection(this.gameId);
@@ -186,7 +214,7 @@ export class GameService {
 
 			if (this.location === 'remote') {
 				this.sendAction({
-					action: 'join',
+					action: GameLogActions.JOIN,
 					player: this.player
 				});
 			}
@@ -194,6 +222,8 @@ export class GameService {
 			if (this.activePlayer.onlineStatus === 'bot') {
 				this.takeTurnForPlayer(this.activePlayer);
 			}
+
+			this.isLoaded = true;
 		});
 	}
 
@@ -223,7 +253,7 @@ export class GameService {
 	}
 
 	save() {
-		if (this.location === 'local' || this.player.host) {
+		if (this.player.host) {
 			this.storage.saveGame(this, this.gameId);
 		}
 	}
@@ -400,7 +430,6 @@ export class GameService {
 	}
 
 	public discardCard(player: Player, card: Card, forceDiscard = false): void {
-		console.log('Discard Card');
 		if (this.location === 'local') {
 			this.executeDiscardCard(player, card, forceDiscard);
 		} else {
@@ -431,6 +460,17 @@ export class GameService {
 				card,
 				action: GameLogActions.DISCARD_DRAW
 			});
+
+			if (this.deck.length === 0 && this.player.host) {
+				this.shuffleDiscardIntoDeck();
+				if (this.location === 'remote') {
+					this.sendAction({
+						action: GameLogActions.SHUFFLE,
+						cards: this.deck
+					});
+				}
+			}
+
 			this.save();
 			this.sendUpdate();
 		}
@@ -518,18 +558,36 @@ export class GameService {
 	}
 
 	handleMessage(flatItem: FlatGameLogItem) {
+		if (!this.isLoaded) {
+			console.error('Message arrived before game was loaded', flatItem);
+			return false;
+		}
+		const { PLAY, DISCARD, DISCARD_DRAW, JOIN, SHUFFLE, ADVANCE_ROUND } = GameLogActions;
 		const item = this.hydrateGameLogItem(flatItem);
 
-		if (item.action === GameLogActions.PLAY) {
+		console.log('Handle Message', item.action, item.player && item.player.name, item);
+
+		if (item.action === PLAY) {
 			this.executePlayCard(item.player, item.card, item.piece, item.space);
-		} else if (item.action === GameLogActions.DISCARD || item.action === GameLogActions.DISCARD_DRAW) {
+		} else if (item.action === DISCARD || item.action === DISCARD_DRAW) {
 			this.executeDiscardCard(item.player, item.card);
 			if (this.hasDiscarded && item.player.onlineStatus === 'bot') {
 				this.takeTurnForPlayer(item.player);
 			}
-		} else if (item.action === 'join') {
+		} else if (item.action === JOIN) {
 			item.player.onlineStatus = 'online';
 			this.save();
+		} else if (item.action === SHUFFLE) {
+			this.deck = item.cards;
+			this.discard = [];
+			this.sendUpdate(['deck', 'discard']);
+		} else if (item.action === ADVANCE_ROUND) {
+			if (item.cards) {
+				this.deck = item.cards;
+				this.discard = [];
+				this.updates.push('deck', 'discard');
+			}
+			this.executeAdvanceRound();
 		}
 	}
 
@@ -552,6 +610,10 @@ export class GameService {
 
 		if (flatItem.spaceId !== undefined) {
 			item.space = this.spaces.find(space => space.id === flatItem.spaceId);
+		}
+
+		if (flatItem.cardIds !== undefined) {
+			item.cards = flatItem.cardIds.map(cardId => this.cards[cardId]);
 		}
 
 		return item;
