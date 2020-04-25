@@ -1,7 +1,5 @@
 import { Component, OnInit, Input, SimpleChanges, OnChanges } from '@angular/core';
 import { Card } from '../card.model';
-import { GameService } from '../game.service';
-import { InterfaceService } from '../interface.service';
 import { Player } from '../player.model';
 
 @Component({
@@ -10,9 +8,6 @@ import { Player } from '../player.model';
 	styleUrls: ['./hand.component.css']
 })
 export class HandComponent implements OnInit, OnChanges {
-	@Input() game: GameService;
-	@Input() cards: Card[];
-	@Input() interfaceService: InterfaceService;
 	@Input() player: Player;
 
 	builtHand = [];
@@ -31,15 +26,17 @@ export class HandComponent implements OnInit, OnChanges {
 
 	buildHand() {
 
+		const { hand: cards = [] } = this.player;
+
 		const ROTATION_INTERVAL = 6;
 		const HORIZONTAL_SPACING = 40;
 		const VERTICAL_SPACING = 5;
 
-		const startingRotation = (this.cards.length - 1) / 2 * ROTATION_INTERVAL * - 1;
-		const startingLeft = (this.cards.length - 1) / 2 * HORIZONTAL_SPACING * - 1;
-		const startingTop = (this.cards.length - 1) / 2 * VERTICAL_SPACING * -1;
+		const startingRotation = (cards.length - 1) / 2 * ROTATION_INTERVAL * - 1;
+		const startingLeft = (cards.length - 1) / 2 * HORIZONTAL_SPACING * - 1;
+		const startingTop = (cards.length - 1) / 2 * VERTICAL_SPACING * -1;
 
-		this.builtHand = this.cards.map((card: Card, index) => {
+		this.builtHand = cards.map((card: Card, index) => {
 			return {
 				card,
 				rotation: startingRotation + index * ROTATION_INTERVAL,

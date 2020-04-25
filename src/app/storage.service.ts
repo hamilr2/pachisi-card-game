@@ -79,7 +79,7 @@ export class StorageService {
 	}
 
 	getRemoteGameInfos(): Observable<GameInfo[]> {
-		return this.http.get<{[key: string]: GameInfo}>(`${firebaseUrl}gameInfos.json`)
+		return this.http.get<Record<string, GameInfo>>(`${firebaseUrl}gameInfos.json`)
 			.pipe(map((gameInfoObjects) => {
 				return Object.values(gameInfoObjects).filter(gameInfo => !!gameInfo);
 			}));

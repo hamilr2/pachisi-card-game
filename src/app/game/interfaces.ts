@@ -1,5 +1,6 @@
 import { Piece } from './piece.model';
 import { Space } from './space.model';
+import { Card } from './card.model';
 
 export interface MovablePiece {
 	piece: Piece;
@@ -9,4 +10,9 @@ export interface MovablePiece {
 export interface CardResult {
 	movablePieces: MovablePiece[];
 	errorMessage?: string;
+}
+
+export interface UsableCard {
+	movablePieces: MovablePiece[];
+	card: Card;
 }
