@@ -1,20 +1,25 @@
-import { Component, OnInit, Input, SimpleChanges, OnChanges } from '@angular/core';
+import { Component, OnInit, Input, SimpleChanges, OnChanges, OnDestroy } from '@angular/core';
 import { Card } from '../card.model';
 import { Player } from '../player.model';
+import { Subscription } from 'rxjs';
+import { GameService } from '../game.service';
 
 @Component({
 	selector: 'app-hand',
 	templateUrl: './hand.component.html',
 	styleUrls: ['./hand.component.css']
 })
-export class HandComponent implements OnInit, OnChanges {
+export class HandComponent implements OnInit, OnDestroy {
 	@Input() player: Player;
+	subscription: Subscription;
 
 	builtHand = [];
 
-	constructor() { }
+	constructor(
+		private game: GameService
+	) { }
 
-	onCardActiveChange({card, active}: {card: Card, active: boolean}) {
+	onCardActiveChange({card, active}: {card: Card, active: boolean}): void {
 		this.builtHand.forEach((builtHandCard) => {
 			if (builtHandCard.card === card) {
 				builtHandCard.active = active;
@@ -24,9 +29,9 @@ export class HandComponent implements OnInit, OnChanges {
 		});
 	}
 
-	buildHand() {
+	buildHand(): void {
 
-		const { hand: cards = [] } = this.player;
+		const { player: { hand: cards = [] } } = this.game;
 
 		const ROTATION_INTERVAL = 6;
 		const HORIZONTAL_SPACING = 40;
@@ -47,12 +52,15 @@ export class HandComponent implements OnInit, OnChanges {
 		});
 	}
 
-	ngOnChanges(changes: SimpleChanges) {
-		this.buildHand();
-	}
-
 	ngOnInit(): void {
 		this.buildHand();
+		this.subscription = this.game.update.subscribe(() => {
+			this.buildHand();
+		});
+	}
+
+	ngOnDestroy(): void {
+		this.subscription.unsubscribe();
 	}
 
 }

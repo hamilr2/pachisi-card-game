@@ -28,6 +28,8 @@ export class Space {
 
 	constructor(options: SpaceOptions) {
 		Object.assign(this, options);
-		this.id = overallCount++;
+		if (isNaN(this.id)) {
+			this.id = overallCount++;
+		}
 	}
 }

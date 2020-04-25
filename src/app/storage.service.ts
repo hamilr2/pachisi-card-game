@@ -254,6 +254,8 @@ export class StorageService {
 			});
 		});
 
+		console.log(newGame);
+
 		// hopefully in the right order
 		newGame.boardSpaces = newGame.spaces.filter(space => !space.isGoal);
 		newGame.deck = deckCardIds.map(id => {

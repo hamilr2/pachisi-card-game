@@ -8,13 +8,13 @@ The online version of this game makes use (abuses?) Firebase's Real-time Databas
 
 #### Cards
 * Burning Seven
-* Swap
-* Joker -- selection of Burning Seven
+* ~~ Swap ~~
+* Joker -- selection of Burning Seven / Swap
 
 #### Game Logic
-* No passing other home players
-* Send to Home (possibly even own piece)
-* In-goal movement (no -4?)
+* ~~ No passing other home players ~~
+* ~~ Send to Home (possibly even own piece) ~~
+* ~~ In-goal movement (no -4?) ~~
 * Pre-round card swap
 * Victory condition detection
 * Rotate starting player clockwise each round
@@ -43,10 +43,13 @@ The online version of this game makes use (abuses?) Firebase's Real-time Databas
 * Expandable Activity Log (and persistence)
 
 #### Graphics
-* Piece movement animations (and game-sync)
-* Swap animation
+* Card playing button re-work ( + joker selection?)
 * Burning Seven special treatment
 * Pre-animate own card plays/discards to eliminate lag
+* Animate away cards from hand
+* Animate dealing
+* Animate piece movement animations (and game-sync)
+* Animate swap
 * 3D view
 * More obvious piece/space selection
 * Home screen re-style

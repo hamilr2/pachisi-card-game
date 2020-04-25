@@ -10,6 +10,12 @@ interface CardOptions {
 	values?: number[];
 }
 
+export const CardSpecials = {
+	SWAP: 'swap',
+	BURNING: 'burning',
+	JOKER: 'joker'
+};
+
 export class Card {
 	id: number;
 	basic = false;

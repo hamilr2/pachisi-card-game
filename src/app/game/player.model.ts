@@ -50,7 +50,7 @@ export class Player {
 		this.home = [...this.pieces];
 
 		this.goal = new Array(GOAL_SIZE).fill({}).map(({}, index) => new Space({
-			id: Number('' + this.id + ' ' + index),
+			id: Number('' + this.id + '0' + index),
 			isGoal: true,
 			player: this
 		}));

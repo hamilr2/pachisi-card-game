@@ -1,7 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { HandComponent } from './hand.component';
 import { Player } from '../player.model';
+import { GameService } from '../game.service';
 
 describe('HandComponent', () => {
 	let component: HandComponent;
@@ -9,6 +11,8 @@ describe('HandComponent', () => {
 
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
+			imports: [ HttpClientTestingModule ],
+			providers: [ GameService ],
 			declarations: [ HandComponent ]
 		})
 		.compileComponents();
@@ -17,11 +21,8 @@ describe('HandComponent', () => {
 	beforeEach(() => {
 		fixture = TestBed.createComponent(HandComponent);
 		component = fixture.componentInstance;
-		component.player = new Player({
-			color: 'red',
-			id: 0,
-			name: 'Red'
-		});
+		const game = TestBed.inject(GameService);
+		game.newGame();
 
 		fixture.detectChanges();
 	});
