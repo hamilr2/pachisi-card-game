@@ -29,8 +29,8 @@ export class HandCardComponent implements OnInit {
 	isPlayable() {
 		// Consider adjusting this to the hand
 		const player: Player = this.interfaceService.player;
-		const hasMovablePieces = !!this.game.getMovablePiecesForCard(player, this.card).movablePieces.length;
-		return hasMovablePieces;
+		const movablePieces = this.game.getMovablePiecesForCard(player, this.card).movablePieces;
+		return !!movablePieces.length;
 	}
 
 	onClickCard() {

@@ -19,15 +19,11 @@ export class LiveService {
 		eventSource.addEventListener('put', this.handleEvent.bind(this));
 		eventSource.addEventListener('patch', this.handleEvent.bind(this));
 
-		eventSource.onmessage = (e) => {
-			console.log('EventSource', e);
-		};
 		this.connections.push(eventSource);
 	}
 
 	handleEvent(event: MessageEvent) {
 		const eventData = JSON.parse(event.data);
-		//console.log('EventSource', event.type, eventData);
 
 		if (eventData.data	) {
 			this.incomingMessage.next(eventData.data as FlatGameLogItem);

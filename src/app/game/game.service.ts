@@ -146,6 +146,9 @@ export class GameService {
 		if (!this.player.host) {
 			return;
 		}
+
+		// console.log('Taking turn for ', player.name);
+
 		// Get eligible moves
 		const usableCards = this.getUsableCards(player);
 
@@ -368,7 +371,7 @@ export class GameService {
 				spacePossibilities[moves] = [this.boardSpaces[index]];
 				moves--;
 			}
-			// console.log(spacePossibilities);
+
 			return spacePossibilities;
 		}
 	}
@@ -389,6 +392,8 @@ export class GameService {
 
 	executePlayCard(player: Player, card: Card, piece?: Piece, space?: Space) {
 		let errorMessage = '';
+
+		// console.log('Execute Play Card', player, card, piece, space);
 
 		if (card.startable && !piece.space) {
 			if (player.home.length > 0) {
@@ -565,7 +570,7 @@ export class GameService {
 		const { PLAY, DISCARD, DISCARD_DRAW, JOIN, SHUFFLE, ADVANCE_ROUND } = GameLogActions;
 		const item = this.hydrateGameLogItem(flatItem);
 
-		console.log('Handle Message', item.action, item.player && item.player.name, item);
+		// console.log('Handle Message', item.action, item.player && item.player.name, item);
 
 		if (item.action === PLAY) {
 			this.executePlayCard(item.player, item.card, item.piece, item.space);
