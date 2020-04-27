@@ -19,6 +19,7 @@ export class GameComponent implements OnInit, OnDestroy {
 	initialized = false;
 	status: string;
 	lastAction: string;
+	userAction: string;
 
 	constructor(
 		public game: GameService,
@@ -42,6 +43,10 @@ export class GameComponent implements OnInit, OnDestroy {
 				this.status = `${this.game.activePlayer.name} is playing`;
 			}
 			this.buildLastAction(this.game.log.slice(-1)[0]);
+			this.buildUserAction();
+		});
+		this.interfaceService.update.subscribe(() => {
+			this.buildUserAction();
 		});
 		this.game.loadGame(this.gameId, this.location, this.playerId);
 	}
@@ -59,6 +64,31 @@ export class GameComponent implements OnInit, OnDestroy {
 				this.lastAction = `${this.lastAction} and drew a new card`;
 			}
 		}
+	}
+
+	buildUserAction() {
+		let action = '';
+		if (this.game.activePlayer !== this.game.player) {
+			action = 'Await your turn';
+		} else {
+			if (this.interfaceService.selectingPiece === false && this.interfaceService.selectingSpace === false) {
+				if (this.interfaceService.isDiscardNecessary()) {
+					// todo:  need rule variant for team play and sitting out the round
+					action = 'Select a card to discard';
+				} else {
+					action = 'Select a card to play';
+				}
+			} else if (this.interfaceService.selectingPiece) {
+				action = 'Select a piece to move';
+			} else if (this.interfaceService.selectingSpace) {
+				action = 'Select a space to move to';
+			}
+			if (this.interfaceService.burningRemaining) {
+				action = `${action} -- ${this.interfaceService.burningRemaining} burning moves remaining`;
+			}
+		}
+
+		this.userAction = action;
 	}
 
 	onClick() {

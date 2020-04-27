@@ -15,7 +15,8 @@
 }
 
 .main-info,
-.last-action {
+.last-action,
+.user-action {
 	display: flex;
 	justify-content: center;
 	margin: 5px 0;
@@ -28,7 +29,8 @@
 	padding: 3px;
 }
 
-.last-action {
+.last-action,
+.user-action {
 	font-size: 12px;
 }
 

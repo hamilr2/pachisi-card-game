@@ -1,7 +1,6 @@
 import { Player } from './player.model';
 import { Card } from './card.model';
-import { Piece } from './piece.model';
-import { Space } from './space.model';
+import { Move, FlatMove } from './interfaces';
 
 export const GameLogActions = {
 	DISCARD: 'discard',
@@ -17,8 +16,7 @@ export interface GameLogItem {
 	player?: Player;
 	action: string;
 	card?: Card;
-	piece?: Piece;
-	space?: Space;
+	moveSet?: Move[];
 	cards?: Card[];
 }
 
@@ -26,7 +24,6 @@ export interface FlatGameLogItem {
 	playerId?: number;
 	action: string;
 	cardId?: number;
-	pieceId?: number;
-	spaceId?: number;
+	moveSet?: FlatMove[];
 	cardIds?: number[];
 }

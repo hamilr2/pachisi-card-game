@@ -4,10 +4,12 @@ An implementation of the popular Swiss card game Dog. The cards and graphics of 
 
 The online version of this game makes use (abuses?) Firebase's Real-time Database until a Node back-end is written.
 
+The core GameService logic is under test; component tests are stubbed out.
+
 ## Todo List
 
 #### Cards
-* Burning Seven
+* ~~ Burning Seven ~~
 * ~~ Swap ~~
 * Joker -- selection of Burning Seven / Swap
 
@@ -38,6 +40,7 @@ The online version of this game makes use (abuses?) Firebase's Real-time Databas
 
 #### Interface
 * Edit player name
+* Game options on creation (deck, players, rules)
 * Make player bot / take turn for player
 * Home screen game deletion
 * Expandable Activity Log (and persistence)
@@ -58,7 +61,8 @@ The online version of this game makes use (abuses?) Firebase's Real-time Databas
 * Tutorial
 
 #### Development
-* Tests
+* More Test Cases
+* Clean up component test warnings
 
 ## Leftover Angular CLI auto-gen stuff
 

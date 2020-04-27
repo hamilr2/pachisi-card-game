@@ -1,8 +1,9 @@
 
-interface CardOptions {
+export interface CardOptions {
 	id?: number;
 	basic?: boolean;
 	color?: string;
+	quantity?: number;
 	special?: string;
 	startable?: boolean;
 	symbol?: string;

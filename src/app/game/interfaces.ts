@@ -16,3 +16,24 @@ export interface UsableCard {
 	movablePieces: MovablePiece[];
 	card: Card;
 }
+
+export interface FlatMove {
+	pieceId: number;
+	spaceId: number;
+}
+
+export interface Move {
+	piece: Piece;
+	space: Space;
+}
+
+export interface FullMove {
+	piece: Piece;
+	startSpace?: Space;
+	endSpace?: Space;
+}
+
+export interface MoveResult {
+	errorMessage?: string;
+	fullMoves: FullMove[];
+}

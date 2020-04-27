@@ -4,11 +4,13 @@ import { StorageService } from '../storage.service';
 import { Space } from './space.model';
 import { Player } from './player.model';
 import { Piece } from './piece.model';
-import { CardResult, MovablePiece, UsableCard } from './interfaces';
+import { CardResult, MovablePiece, UsableCard, FlatMove, MoveResult, FullMove } from './interfaces';
 import { Subject } from 'rxjs';
 import { LiveService } from '../live.service';
 import { GameLogItem, GameLogActions, FlatGameLogItem } from './game-log-item.interface';
 import * as DogUtil from '../util.util';
+import * as Decks from './deck/decks.util';
+import { Move } from './interfaces';
 
 const HAND_SIZE = 6;
 const DEFAULT_CARD_QUANTITY = 8;
@@ -43,6 +45,9 @@ export class GameService {
 	turn: number;
 	activePlayer: Player;
 	hasDiscarded: boolean;
+
+	// utilities
+	recursions: number;
 
 	// Events for components
 	updates: string[] = []; // stored set of string, dispatched/cleared on update
@@ -177,7 +182,10 @@ export class GameService {
 		// if it's a seven or joker, move max spaces
 		const spaceToMoveTo = usableCards[0].movablePieces[0].spaces.slice(-1)[0];
 		this.delayUI(() => {
-			this.playCard(player, cardToPlay, pieceToMove, spaceToMoveTo);
+			this.playCard(player, cardToPlay, [{
+				piece: pieceToMove,
+				space: spaceToMoveTo
+			}]);
 		});
 	}
 
@@ -266,7 +274,15 @@ export class GameService {
 		return HAND_SIZE - ((this.round - 1) % 5);
 	}
 
-	public getMovablePiecesForCard(player: Player, card: Card): CardResult {
+	checkMovablePieces(movablePieces, burningRemaining): boolean {
+		return movablePieces.some(({ piece, spaces }) => {
+			return spaces.some(space => {
+				return this.getDistanceBetweenSpaces(piece.space, space) === burningRemaining;
+			});
+		});
+	}
+
+	public getMovablePiecesForCard(player: Player, card: Card, burningRemaining?: number): CardResult {
 		const errorMessage = '';
 
 		const movablePieces: MovablePiece[] = [];
@@ -280,54 +296,23 @@ export class GameService {
 				});
 			}
 		}
-		if (card.values) {
+
+		if (card.special === CardSpecials.BURNING) {
+			burningRemaining = burningRemaining || card.value;
+			movementOptions = new Array(burningRemaining).fill(0).map((value, index) => index + 1);
+		} else if (card.values) {
 			movementOptions = card.values;
 		} else if (card.basic) {
 			movementOptions = [card.value];
 		}
 
 		const boardPieces = player.pieces.filter((piece: Piece) => !!piece.space);
+
 		if (boardPieces.length !== 0) {
 
-			// Get spaces that can be moved to
-			if (movementOptions.length) {
-				movablePieces.push(...boardPieces.map((piece: Piece) => {
-					return {
-						piece,
-						spacePossibilities: this.getSpacePossibilitesForPiece(piece),
-					};
-				}).reduce((result, { piece, spacePossibilities }): MovablePiece[] => {
-					if (!Object.values(spacePossibilities).length) {
-						return result;
-					} else {
-						const spaces: Space[] = [];
-						movementOptions.forEach((numberOfSpaces: number) => {
-							const spacesUnderConsideration: Space[] = spacePossibilities[numberOfSpaces];
-							if (spacesUnderConsideration) {
-								spacesUnderConsideration.forEach(space => {
-									if (space.piece && space.piece.player === player && !RULE_VARIANT_LAND_ON_OWN_PIECE) {
-										// if landing on own piece, and rules disallow that
-										return;
-									} else if (space.piece && space.isStart && space.player === space.piece.player) {
-										// if landing on a piece on its owners home space
-										return;
-									} else {
-										spaces.push(space);
-									}
-								});
-							}
-						});
-						if (!spaces.length) {
-							return result;
-						} else {
-							return [...result, {
-								piece,
-								spaces
-							}];
-						}
-					}
-				}, []));
-			}
+			this.recursions = 0;
+			movablePieces.push(...this.getAndCheckMovablePiecesRecursive(player, boardPieces, card, movementOptions, burningRemaining || card.value));
+			//console.log(this.recursions);
 
 			// Add in swap options
 			if (card.special === CardSpecials.SWAP || card.special === CardSpecials.JOKER) {
@@ -360,9 +345,99 @@ export class GameService {
 		};
 	}
 
-	public getSpacePossibilitesForPiece(piece: Piece): Record<number, Space[]> {
-		const MAX_CARD_VALUE = 13;
-		const MIN_CARD_VALUE = -4;
+	getAndCheckMovablePiecesRecursive(player: Player, consideredPieces: Piece[], card: Card, movementOptions: number[], moveValue: number) {
+		// Get spaces that can be moved to
+		this.recursions++;
+		if (movementOptions.length && consideredPieces.length) {
+			const movablePieces = this.getMovablePiecesForMovementOptions(consideredPieces, movementOptions);
+			if (card.special !== CardSpecials.BURNING) {
+				return movablePieces;
+			} else {
+				// here we go
+				const result = this.checkMovablePieces(movablePieces, moveValue);
+
+				if (result) {
+					return movablePieces;
+				} else {
+					return movablePieces.reduce((resultPieces, movablePiece) => {
+						const { piece, spaces } = movablePiece;
+
+						const filteredSpaces = spaces.filter(space => {
+							// Make a mock move and see what happens
+							const spacesMoved = this.getDistanceBetweenSpaces(piece.space, space);
+							const { fullMoves } = this.createFullMoves(player, card, {
+								piece,
+								space
+							});
+							fullMoves.forEach(this.performMove.bind(this));
+							const filteredPieces = consideredPieces.filter(thisPiece => thisPiece !== piece);
+							const newMovementOptions = new Array(moveValue - spacesMoved).fill(0).map((value, index) => index + 1);
+							const recurseMovablePieces = this.getAndCheckMovablePiecesRecursive(player, filteredPieces, card, newMovementOptions, moveValue - spacesMoved);
+							// Reset local state
+							fullMoves.forEach(this.undoMove.bind(this));
+							// check if there are options
+							if (recurseMovablePieces.length) {
+								return true;
+							}
+						});
+
+						if (filteredSpaces.length) {
+							return [...resultPieces, {
+								piece,
+								spaces: filteredSpaces
+							}];
+						} else {
+							return resultPieces;
+						}
+					}, []);
+				}
+			}
+		}
+		return [];
+	}
+
+	getMovablePiecesForMovementOptions(pieces: Piece[], movementOptions: number[]): MovablePiece[] {
+		const { player } = pieces[0];
+
+		return pieces.map((piece: Piece) => {
+			return {
+				piece,
+				spacePossibilities: this.getSpacePossibilitesForPiece(piece),
+			};
+		}).reduce((result, { piece, spacePossibilities }): MovablePiece[] => {
+			if (!Object.values(spacePossibilities).length) {
+				return result;
+			} else {
+				const spaces: Space[] = [];
+				movementOptions.forEach((numberOfSpaces: number) => {
+					const spacesUnderConsideration: Space[] = spacePossibilities[numberOfSpaces];
+					if (spacesUnderConsideration) {
+						spacesUnderConsideration.forEach(space => {
+							if (space.piece && space.piece.player === player && !RULE_VARIANT_LAND_ON_OWN_PIECE) {
+								// if landing on own piece, and rules disallow that
+								return;
+							} else if (space.piece && space.isStart && space.player === space.piece.player) {
+								// if landing on a piece on its owners home space
+								return;
+							} else {
+								spaces.push(space);
+							}
+						});
+					}
+				});
+				if (!spaces.length) {
+					return result;
+				} else {
+					return [...result, {
+						piece,
+						spaces
+					}];
+				}
+			}
+		}, []);
+	}
+
+	public getSpacePossibilitesForPiece(piece: Piece, min: number = -4, max: number = 13): Record<number, Space[]> {
 		if (!piece.space) {
 			return {};
 		}
@@ -378,10 +453,10 @@ export class GameService {
 			const spacePossibilities = {};
 			const currentIndex = this.boardSpaces.findIndex(thisSpace => thisSpace === piece.space);
 			let index = currentIndex;
-			let moves = 1;
+			let moves = Math.max(1, min);
 
 			// Loop around the board, adding spaces
-			while (moves <= MAX_CARD_VALUE) {
+			while (moves <= max) {
 				index++;
 				// loop around
 				if (index >= this.boardSpaces.length) {
@@ -413,38 +488,39 @@ export class GameService {
 			});
 
 			// Add spaces for negative movement
-			moves = -1;
-			index = currentIndex;
-			while (moves >= MIN_CARD_VALUE) {
-				index--;
-				if (index < 0) {
-					index = this.boardSpaces.length - 1;
+			if (min < 0) {
+				moves = -1;
+				index = currentIndex;
+				while (moves >= min) {
+					index--;
+					if (index < 0) {
+						index = this.boardSpaces.length - 1;
+					}
+					spacePossibilities[moves] = [this.boardSpaces[index]];
+					moves--;
 				}
-				spacePossibilities[moves] = [this.boardSpaces[index]];
-				moves--;
 			}
 
 			return spacePossibilities;
 		}
 	}
 
-	public playCard(player: Player, card: Card, piece?: Piece, space?: Space): void {
+	public playCard(player: Player, card: Card, moveSet: Move[]): void {
 		if (this.location === 'local') {
-			this.attemptPlayCard(player, card, piece, space);
+			this.attemptPlayCard(player, card, moveSet);
 		} else {
 			this.sendAction({
 				action: GameLogActions.PLAY,
 				player,
 				card,
-				piece,
-				space
+				moveSet
 			});
 		}
 	}
 
-	attemptPlayCard(player: Player, card: Card, piece: Piece, space: Space): boolean {
+	attemptPlayCard(player: Player, card: Card, moveSet: Move[]): boolean {
 
-		const errorMessage = this.executePlayCard(player, card, piece, space);
+		const errorMessage = this.executePlayCard(player, card, moveSet);
 
 		if (errorMessage) {
 			alert(errorMessage);
@@ -463,60 +539,142 @@ export class GameService {
 		return true;
 	}
 
-	executePlayCard(player: Player, card: Card, piece: Piece, space: Space): string {
-		let errorMessage = '';
+	executePlayCard(player: Player, card: Card, moveSet: Move[]): string {
 
-		// Validate player/card/piece/space combo is valid
-		const { movablePieces } = this.getMovablePiecesForCard(player, card);
-		const foundPiece = movablePieces.find((movablePiece: MovablePiece) => {
-			return movablePiece.piece === piece;
+		if (card.special !== CardSpecials.BURNING) {
+			// Validate player/card/piece/space combo is valid
+			const { piece, space } = moveSet[0];
+			const { movablePieces } = this.getMovablePiecesForCard(player, card);
+			const foundPiece = movablePieces.find((movablePiece: MovablePiece) => {
+				return movablePiece.piece === piece;
+			});
+
+			if (!foundPiece) {
+				return 'This piece is not eligible to be moved';
+			} else if (!foundPiece.spaces.includes(space)) {
+				return 'This piece cannot be moved to this space';
+			}
+		} else {
+			// todo: validate burning seven move
+			// can possibly just validate as we loop, undo if there's an issue
+		}
+
+		const completedMoves = [];
+		let error = '';
+
+		moveSet.forEach(move => {
+			const result = this.createFullMoves(player, card, move);
+			if (result.errorMessage) {
+				error = result.errorMessage;
+			} else {
+				result.fullMoves.forEach(this.performMove.bind(this));
+				completedMoves.push(...result.fullMoves);
+			}
 		});
 
-		if (!foundPiece) {
-			return 'This piece is not eligible to be moved';
-		} else if (!foundPiece.spaces.includes(space)) {
-			return 'This piece cannot be moved to this space';
+		if (error) {
+			completedMoves.reverse().forEach(this.undoMove.bind(this));
 		}
+
+		return error;
+	}
+
+	createFullMoves(player, card, move): MoveResult {
+		const fullMoves: FullMove[] = [];
+		const { space, piece } = move;
+		let errorMessage = '';
 
 		if (card.startable && !piece.space) {
 			if (player.home.length > 0) {
 				const startSpace = player.spaces[0];
 
 				if (startSpace.piece) {
-					startSpace.piece.player.home.push(startSpace.piece);
-					startSpace.piece.space = null;
+					// kick the other piece out
+					fullMoves.push({
+						piece: startSpace.piece,
+						startSpace,
+						endSpace: null
+					});
 				}
-
-				player.spaces[0].piece = player.home.shift();
-				player.spaces[0].piece.space = player.spaces[0];
-				this.updates.push('home');
+				fullMoves.push({
+					piece,
+					endSpace: space
+				});
 			} else {
 				errorMessage = 'No pieces left in home!';
 			}
 		} else {
 			const oldSpace = piece.space;
 
-			if (space.piece) {
-				const otherPiece = space.piece;
+			fullMoves.push({
+				piece,
+				startSpace: oldSpace,
+				endSpace: space
+			});
 
-				if (card.special === CardSpecials.SWAP) {
-					oldSpace.piece = otherPiece;
-					otherPiece.space = oldSpace;
-					console.log('SWAP!!!', otherPiece, piece)
-				} else {
-					otherPiece.space = null;
-					otherPiece.player.home.push(otherPiece);
-					console.log('Send Home!!!', otherPiece, piece);
+			// Send all passed pieces home
+			if (card.special === CardSpecials.BURNING) {
+				let spaceIterator = piece.space;
+				while (spaceIterator !== space) {
+					// stop if we're on own home and headed into goal
+					if (space.isGoal && spaceIterator.isStart && piece.player === spaceIterator.player) {
+						break;
+					}
+					let boardIndex = this.boardSpaces.findIndex(boardSpace => boardSpace === spaceIterator);
+					if (boardIndex === this.boardSpaces.length - 1) {
+						boardIndex = -1;
+					}
+					spaceIterator = this.boardSpaces[boardIndex + 1];
+					if (spaceIterator.piece) {
+						fullMoves.push({
+							piece: spaceIterator.piece,
+							startSpace: spaceIterator
+						});
+					}
+				}
+			} else { // only send landed on piece home
+				if (space.piece) {
+					fullMoves.push({
+						piece: space.piece,
+						startSpace: space,
+						endSpace: card.special === CardSpecials.SWAP ? oldSpace : null
+					});
 				}
 			}
-
-			piece.space = space;
-			space.piece = piece;
-			oldSpace.piece = null;
 		}
 
-		return errorMessage;
+		return {
+			fullMoves,
+			errorMessage
+		};
 	}
+
+	performMove({ piece, startSpace, endSpace }: FullMove): void {
+		this.executeMove(piece, startSpace, endSpace);
+	}
+
+	undoMove({ piece, startSpace, endSpace }: FullMove): void {
+		this.executeMove(piece, endSpace, startSpace);
+	}
+
+	private executeMove(piece, startSpace, endSpace): void {
+		if (!endSpace) {
+			piece.player.home.push(piece);
+			piece.space = null;
+			this.updates.push('home');
+		} else {
+			piece.space = endSpace;
+			endSpace.piece = piece;
+		}
+		if (!startSpace) {
+			piece.player.home = piece.player.home.filter(homePiece => homePiece !== piece);
+			this.updates.push('home');
+		} else if (startSpace.piece === piece) {
+			// another move could have swapped a piece here, so check to see that we're only removing our own piece
+			startSpace.piece = null;
+		}
+	}
+
 
 	public discardCard(player: Player, card: Card, forceDiscard = false): void {
 		if (this.location === 'local') {
@@ -579,46 +737,9 @@ export class GameService {
 	}
 
 	buildDeck(): void {
-		const cards = [
-			{
-				symbol: '?',
-				quantity: 6,
-				startable: true,
-				special: CardSpecials.JOKER,
-				values: [-4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-			},
-			{
-				symbol: 'S',
-				special: CardSpecials.SWAP
-			},
-			{
-				symbol: '1/11',
-				startable: true,
-				values: [1, 11]
-			},
-			{ value: 2 },
-			{ value: 3 },
-			{
-				symbol: '±4',
-				values: [-4, 4]
-			},
-			{ value: 5 },
-			{ value: 6 },
-			{
-				symbol: '7',
-				special: CardSpecials.BURNING,
-				values: [1, 2, 3, 4, 5, 6, 7]
-			},
-			{ value: 8 },
-			{ value: 9 },
-			{ value: 10 },
-			{ value: 12 },
-			{
-				symbol: '13',
-				startable: true,
-				values: [13]
-			}
-		];
+		// Todo: Build in deck-choosing functionality
+		const cards = Decks.STANDARD_DECK;
+		// const cards = Decks.ALL_SEVENS;
 
 		let id = 0;
 
@@ -638,6 +759,21 @@ export class GameService {
 		this.players.forEach((player: Player) => {
 			this.boardSpaces.push(...player.spaces);
 		});
+	}
+
+	getDistanceBetweenSpaces(startSpace: Space, endSpace: Space): number {
+		let startIndex = this.boardSpaces.findIndex(space => space === startSpace);
+		let endIndex = this.boardSpaces.findIndex(space => space === endSpace);
+		if (endSpace.isGoal) {
+			const endGoalIndex = endSpace.player.goal.findIndex(space => space === endSpace);
+			if (startSpace.isGoal) {
+				startIndex = startSpace.player.goal.findIndex(space => space === startSpace);
+				endIndex = endGoalIndex;
+			} else {
+				endIndex = this.boardSpaces.findIndex(space => space === endSpace.player.spaces[0]) + endGoalIndex + 1;
+			}
+		}
+		return startIndex < endIndex ? (endIndex - startIndex) : (endIndex - startIndex + 64);
 	}
 
 	sendAction(item: GameLogItem): void {
@@ -660,7 +796,7 @@ export class GameService {
 		// console.log('Handle Message', item.action, item.player && item.player.name, item);
 
 		if (item.action === PLAY) {
-			this.attemptPlayCard(item.player, item.card, item.piece, item.space);
+			this.attemptPlayCard(item.player, item.card, item.moveSet);
 		} else if (item.action === DISCARD || item.action === DISCARD_DRAW) {
 			this.executeDiscardCard(item.player, item.card);
 			if (this.hasDiscarded && item.player.onlineStatus === 'bot') {
@@ -696,12 +832,13 @@ export class GameService {
 			item.player = this.players.find(player => player.id === flatItem.playerId);
 		}
 
-		if (flatItem.pieceId !== undefined) {
-			item.piece = this.pieces.find(piece => piece.id === flatItem.pieceId);
-		}
-
-		if (flatItem.spaceId !== undefined) {
-			item.space = this.spaces.find(space => space.id === flatItem.spaceId);
+		if (flatItem.moveSet !== undefined) {
+			item.moveSet = flatItem.moveSet.map(({ pieceId, spaceId }: FlatMove) => {
+				return {
+					piece: this.pieces.find(piece => piece.id === pieceId),
+					space: this.spaces.find(space => space.id === spaceId)
+				}
+			});
 		}
 
 		if (flatItem.cardIds !== undefined) {
