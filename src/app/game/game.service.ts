@@ -464,8 +464,11 @@ export class GameService {
 		}
 		if (piece.space.isGoal) {
 			const goalIndex = piece.player.goal.findIndex(space => space === piece.space);
+			let hitPiece = false;
 			return piece.player.goal.slice(goalIndex + 1).reduce((spacePossibilities: Record<number, Space[]>, space, index) => {
-				if (!space.piece) {
+				if (space.piece) {
+					hitPiece = true;
+				} else if (!hitPiece) {
 					spacePossibilities[index + 1] = [ space ];
 				}
 				return spacePossibilities;
@@ -495,15 +498,20 @@ export class GameService {
 			// find goal spaces within reach
 			// currently this disallows moving into home "over" your piece on your home space
 			let startMove;
+			let hitPiece = false;
 			Object.entries(spacePossibilities).forEach(([movesString, spaces]: [string, Space[]]) => {
 				const numberMoves = Number(movesString);
 				if (spaces[0].isStart && spaces[0].player === piece.player) {
 					startMove = numberMoves;
 				}
-				if (startMove && numberMoves > startMove) {
+				if (startMove && numberMoves > startMove && !hitPiece) {
 					const goalIndex = numberMoves - startMove - 1;
-					if (piece.player.goal[goalIndex] && !piece.player.goal[goalIndex].piece) {
-						spaces.push(piece.player.goal[goalIndex]);
+					if (piece.player.goal[goalIndex]) {
+						if (piece.player.goal[goalIndex].piece) {
+							hitPiece = true;
+						} else {
+							spaces.push(piece.player.goal[goalIndex]);
+						}
 					}
 				}
 			});

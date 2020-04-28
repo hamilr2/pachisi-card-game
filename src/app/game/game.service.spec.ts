@@ -359,7 +359,16 @@ describe('Game Service - Cards / Movement', () => {
 		expect(spacePossibilities[3]).toBeFalsy();
 	});
 
-	it('should not allow a piece outside the goal to move into an occupied space in the goal', () => {
+	it('should not allow a piece in the goal to move past another piece in the goal', () => {
+		assignPieceToSpace(players[0].pieces[0], players[0].goal[0]);
+		assignPieceToSpace(players[0].pieces[1], players[0].goal[1]);
+
+		const spacePossibilities = game.getSpacePossibilitesForPiece(players[0].pieces[0]);
+
+		expect(Object.values(spacePossibilities).length).toEqual(0);
+	});
+
+	it('should not allow a piece outside the goal to move into an occupied space in the goal, or past a piece into the goal', () => {
 		assignPieceToSpace(players[0].pieces[0], boardSpaces[63]);
 		assignPieceToSpace(players[0].pieces[1], players[0].goal[1]);
 
@@ -369,6 +378,8 @@ describe('Game Service - Cards / Movement', () => {
 		expect(spacePossibilities[2][1].isGoal).toBeTruthy();
 		expect(spacePossibilities[3].length).toEqual(1);
 		expect(spacePossibilities[3][0].isGoal).toBeFalsy();
+		expect(spacePossibilities[4].length).toEqual(1);
+		expect(spacePossibilities[4][0].isGoal).toBeFalsy();
 	});
 
 	//
