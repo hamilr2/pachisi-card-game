@@ -1,7 +1,6 @@
 import { Piece } from './piece.model';
 import { Card } from './card.model';
 import { Space } from './space.model';
-import { NUMBER_OF_PLAYERS } from './game.service';
 
 const NUMBER_OF_PIECES = 4;
 const GOAL_SIZE = 4;

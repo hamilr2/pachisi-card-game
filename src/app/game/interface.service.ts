@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { GameService } from './game.service';
 import { Piece } from './piece.model';
 import { Space } from './space.model';
-import { Card, CardSpecials } from './card.model';
+import { Card, CardSpecials, CardAction } from './card.model';
 import { Player } from './player.model';
 import { MovablePiece, Move, FullMove } from './interfaces';
 import { Subject } from 'rxjs';
@@ -14,8 +14,9 @@ export class InterfaceService {
 	game: GameService;
 	update = new Subject<void>();
 
-	activePiece: Piece;
 	activeCard: Card;
+	activeAction: CardAction;
+	activePiece: Piece;
 
 	selectingPiece = false;
 	selectingSpace = false;
@@ -55,15 +56,13 @@ export class InterfaceService {
 	}
 
 	isDiscardNecessary(player: Player = this.player) {
-		const playables = player.hand.filter((card: Card) => {
-			return !!this.game.getMovablePiecesForCard(player, card).movablePieces.length;
-		});
-		return playables.length === 0;
+		const usableCards = this.game.getUsableCards(player);
+		return usableCards.length === 0;
 	}
 
-	attemptPlayCard(card: Card, player: Player = this.player) {
+	attemptPlayCard(card: Card, action: CardAction) {
 
-		const { movablePieces, errorMessage } = this.game.getMovablePiecesForCard(player, card);
+		const { movablePieces, errorMessage } = this.game.getMovablePiecesForAction(this.player, action);
 		if (errorMessage) {
 			this.errorMessage = errorMessage;
 			return false;
@@ -73,10 +72,11 @@ export class InterfaceService {
 			this.errorMessage = 'No pieces are able to move';
 		} else {
 			this.activeCard = card;
+			this.activeAction = action;
 			this.selectingPiece = true;
 			this.movablePieces = movablePieces;
-			if (card.special === CardSpecials.BURNING) {
-				this.burningRemaining = card.value;
+			if (action.special === CardSpecials.BURNING) {
+				this.burningRemaining = action.value;
 			}
 			this.update.next();
 			return true;
@@ -117,10 +117,10 @@ export class InterfaceService {
 				this.selectingPiece = true;
 				this.selectingSpace = false;
 				this.activePiece = null;
-				const fullMoves = this.game.createFullMoves(this.player, this.activeCard, move).fullMoves;
+				const fullMoves = this.game.createFullMoves(this.player, this.activeAction, move).fullMoves;
 				this.mockMoves.push(...fullMoves);
 				fullMoves.forEach(fullMove => this.game.performMove(fullMove));
-				this.movablePieces = this.game.getMovablePiecesForCard(this.player, this.activeCard, this.burningRemaining).movablePieces;
+				this.movablePieces = this.game.getMovablePiecesForAction(this.player, this.activeAction, this.burningRemaining).movablePieces;
 				this.update.next();
 				return;
 			}
@@ -129,13 +129,14 @@ export class InterfaceService {
 			this.mockMoves.reverse().forEach(mockMove => this.game.undoMove(mockMove));
 			this.mockMoves = [];
 		}
-		this.game.playCard(this.player, this.activeCard, this.moveSet);
+		this.game.playCard(this.player, this.activeCard, this.activeAction, this.moveSet);
 		this.reset();
 	}
 
 	reset() {
 		this.activePiece = null;
 		this.activeCard = null;
+		this.activeAction = null;
 		this.selectingPiece = false;
 		this.selectingSpace = false;
 		this.movablePieces = [];

@@ -4,39 +4,35 @@ export interface CardOptions {
 	basic?: boolean;
 	color?: string;
 	quantity?: number;
-	special?: string;
-	startable?: boolean;
 	symbol?: string;
+	actions?: CardAction[];
+}
+
+export interface CardAction {
 	value?: number;
 	values?: number[];
+	startable?: boolean;
+	special?: string;
+	text?: string;
 }
 
 export const CardSpecials = {
 	SWAP: 'swap',
 	BURNING: 'burning',
-	JOKER: 'joker'
+	// JOKER: 'joker'
 };
 
 export class Card {
 	id: number;
 	basic = false;
 	color = 'blue';
-	special: string;
-	startable = false;
 	symbol: string;
-	value: number;
-	values: number[];
+	actions: CardAction[] = [];
 
 	constructor(options: CardOptions) {
 		Object.assign(this, options);
-
-		if (!options.color) {
-			if (this.symbol) {
-				this.color = 'red';
-			} else if (this.value) {
-				this.basic = true;
-				this.symbol = `${this.value}`;
-			}
+		if (!this.symbol && this.actions.length && this.actions[0].value) {
+			this.symbol = `${this.actions[0].value}`;
 		}
 	}
 }

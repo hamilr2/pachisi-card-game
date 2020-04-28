@@ -2,7 +2,6 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { HandComponent } from './hand.component';
-import { Player } from '../player.model';
 import { GameService } from '../game.service';
 
 describe('HandComponent', () => {

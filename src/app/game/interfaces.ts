@@ -1,6 +1,6 @@
 import { Piece } from './piece.model';
 import { Space } from './space.model';
-import { Card } from './card.model';
+import { Card, CardAction } from './card.model';
 
 export interface MovablePiece {
 	piece: Piece;
@@ -13,8 +13,13 @@ export interface CardResult {
 }
 
 export interface UsableCard {
-	movablePieces: MovablePiece[];
+	usableActions: UsableAction[];
 	card: Card;
+}
+
+export interface UsableAction {
+	action: CardAction;
+	movablePieces: MovablePiece[];
 }
 
 export interface FlatMove {

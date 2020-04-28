@@ -1,14 +1,14 @@
-import { Card } from './game/card.model';
-import { Injectable } from '@angular/core';
-import { Player, FlatPlayer } from './game/player.model';
-import { Piece, FlatPiece } from './game/piece.model';
-import { Space, FlatSpace, SpaceOptions } from './game/space.model';
-import { GameService } from './game/game.service';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { GameLogItem, FlatGameLogItem } from './game/game-log-item.interface';
+import { Card } from './game/card.model';
+import { FlatGameLogItem, GameLogItem } from './game/game-log-item.interface';
+import { GameService } from './game/game.service';
+import { FlatPiece, Piece } from './game/piece.model';
+import { FlatPlayer, Player } from './game/player.model';
+import { FlatSpace, Space, SpaceOptions } from './game/space.model';
 
 const firebaseUrl = environment.firebaseUrl;
 
@@ -253,8 +253,6 @@ export class StorageService {
 				return player.pieces.find(piece => piece.id === id);
 			});
 		});
-
-		console.log(newGame);
 
 		// hopefully in the right order
 		newGame.boardSpaces = newGame.spaces.filter(space => !space.isGoal);

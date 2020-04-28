@@ -1,12 +1,12 @@
-import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-
+import { TestBed } from '@angular/core/testing';
+import { CardAction, CardSpecials } from './card.model';
 import { GameService } from './game.service';
-import { Piece } from './piece.model';
-import { Space } from './space.model';
-import { CardSpecials, Card } from './card.model';
-import { Player } from './player.model';
 import { FullMove } from './interfaces';
+import { Piece } from './piece.model';
+import { Player } from './player.model';
+import { Space } from './space.model';
+
 
 describe('Game Service - Basics', () => {
 	let game: GameService;
@@ -26,14 +26,28 @@ describe('Game Service - Basics', () => {
 	});
 });
 
-fdescribe('Game Service - Cards / Movement', () => {
+describe('Game Service - Cards / Movement', () => {
 
 	let game: GameService;
 
 	let boardSpaces: Space[];
 	let players: Player[];
 
-	const swapCard = new Card({
+	const Actions: Record<string, CardAction> = {
+		swap: {
+			special: CardSpecials.SWAP
+		},
+		startable: {
+			startable: true
+		},
+		burningSeven: {
+			value: 7,
+			special: CardSpecials.BURNING
+		}
+	};
+
+
+	/*const swapCard = new Card({
 		symbol: 'S',
 		special: CardSpecials.SWAP
 	});
@@ -45,7 +59,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 	const burningSeven = new Card({
 		special: CardSpecials.BURNING,
 		value: 7
-	});
+	});*/
 
 	const assignPieceToSpace = (piece: Piece, space: Space) => {
 		game.performMove({
@@ -130,7 +144,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 		expect(boardSpaces[5].piece).toEqual(players[0].pieces[0]);
 		expect(boardSpaces[10].piece).toEqual(players[1].pieces[0]);
 
-		const swapMoves = game.createFullMoves(players[0], swapCard, {
+		const swapMoves = game.createFullMoves(players[0], Actions.swap, {
 			piece: players[0].pieces[0],
 			space: boardSpaces[10]
 		});
@@ -156,7 +170,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 		assignPieceToSpace(players[0].pieces[0], boardSpaces[10]);
 		assignPieceToSpace(players[1].pieces[0], boardSpaces[20]);
 
-		const { movablePieces } = game.getMovablePiecesForCard(players[0], swapCard);
+		const { movablePieces } = game.getMovablePiecesForAction(players[0], Actions.swap);
 
 		expect(movablePieces.length).toEqual(1);
 		expect(movablePieces[0].spaces.length).toEqual(1);
@@ -167,21 +181,21 @@ fdescribe('Game Service - Cards / Movement', () => {
 		assignPieceToSpace(players[0].pieces[0], boardSpaces[10]);
 		assignPieceToSpace(players[0].pieces[1], boardSpaces[20]);
 
-		const { movablePieces } = game.getMovablePiecesForCard(players[0], swapCard);
+		const { movablePieces } = game.getMovablePiecesForAction(players[0], Actions.swap);
 
 		expect(movablePieces.length).toEqual(0);
-	})
+	});
 
 	it('should not allow swapping a piece to the home space', () => {
 		assignPieceToSpace(players[0].pieces[0], boardSpaces[0]);
 		assignPieceToSpace(players[1].pieces[0], boardSpaces[61]);
 
-		let cardResult = game.getMovablePiecesForCard(players[1], swapCard);
+		let cardResult = game.getMovablePiecesForAction(players[1], Actions.swap);
 		expect(cardResult.movablePieces.length).toEqual(0);
 
 		assignPieceToSpace(players[0].pieces[1], boardSpaces[1]);
 
-		cardResult = game.getMovablePiecesForCard(players[1], swapCard);
+		cardResult = game.getMovablePiecesForAction(players[1], Actions.swap);
 		expect(cardResult.movablePieces.length).toEqual(1);
 	});
 
@@ -189,12 +203,12 @@ fdescribe('Game Service - Cards / Movement', () => {
 		assignPieceToSpace(players[0].pieces[0], boardSpaces[0]);
 		assignPieceToSpace(players[1].pieces[0], boardSpaces[61]);
 
-		let cardResult = game.getMovablePiecesForCard(players[0], swapCard);
+		let cardResult = game.getMovablePiecesForAction(players[0], Actions.swap);
 		expect(cardResult.movablePieces.length).toEqual(0);
 
 		assignPieceToSpace(players[0].pieces[1], boardSpaces[1]);
 
-		cardResult = game.getMovablePiecesForCard(players[0], swapCard);
+		cardResult = game.getMovablePiecesForAction(players[0], Actions.swap);
 		expect(cardResult.movablePieces.length).toEqual(1);
 	});
 
@@ -202,7 +216,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 		assignPieceToSpace(players[0].pieces[0], players[0].goal[0]);
 		assignPieceToSpace(players[1].pieces[0], boardSpaces[61]);
 
-		const cardResult = game.getMovablePiecesForCard(players[1], swapCard);
+		const cardResult = game.getMovablePiecesForAction(players[1], Actions.swap);
 		expect(cardResult.movablePieces.length).toEqual(0);
 	});
 
@@ -210,7 +224,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 		assignPieceToSpace(players[0].pieces[0], players[0].goal[0]);
 		assignPieceToSpace(players[1].pieces[0], boardSpaces[61]);
 
-		const cardResult = game.getMovablePiecesForCard(players[0], swapCard);
+		const cardResult = game.getMovablePiecesForAction(players[0], Actions.swap);
 		expect(cardResult.movablePieces.length).toEqual(0);
 	});
 
@@ -227,7 +241,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 		expect(spacePossibilities[2][0]).toEqual(boardSpaces[1]);
 		expect(spacePossibilities[2][1].isGoal).toBeTrue();
 
-		const error = game.executePlayCard(players[0], new Card({value: 2}), [{
+		const error = game.executeAction(players[0], { value: 2 }, [{
 			piece: players[0].pieces[0],
 			space: boardSpaces[1]
 		}]);
@@ -246,7 +260,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 		expect(spacePossibilities[-4].length).toEqual(1);
 		expect(spacePossibilities[-4][0]).toEqual(boardSpaces[63]);
 
-		game.executePlayCard(players[0], new Card({value: -4}), [{
+		game.executeAction(players[0], {value: -4}, [{
 			piece: players[0].pieces[0],
 			space: boardSpaces[63]
 		}]);
@@ -297,7 +311,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 		expect(spacePossibilities[3][0].piece).toBeTruthy();
 		expect(spacePossibilities[4][0].piece).toBeFalsy();
 
-		game.executePlayCard(players[0], new Card({ value: 3}), [{
+		game.executeAction(players[0], { value: 3}, [{
 			piece: players[0].pieces[0],
 			space: spacePossibilities[3][0]
 		}]);
@@ -317,16 +331,16 @@ fdescribe('Game Service - Cards / Movement', () => {
 		expect(spacePossibilities[3]).toBeUndefined();
 		expect(spacePossibilities[-4]).toBeUndefined();
 
-		let { movablePieces } = game.getMovablePiecesForCard(players[0], new Card({ value: 2 }));
+		let { movablePieces } = game.getMovablePiecesForAction(players[0], { value: 2 });
 
 		expect(movablePieces.length).toEqual(1);
 		expect(movablePieces[0].spaces.length).toEqual(1);
 		expect(movablePieces[0].spaces[0]).toEqual(players[0].goal[3]);
 
-		({ movablePieces } = game.getMovablePiecesForCard(players[0], new Card({ value: 3 })));
+		({ movablePieces } = game.getMovablePiecesForAction(players[0], { value: 3 }));
 		expect(movablePieces.length).toEqual(0);
 
-		game.executePlayCard(players[0], new Card({value: 2 }), [{
+		game.executeAction(players[0], { value: 2 }, [{
 			piece: players[0].pieces[0],
 			space: players[0].goal[3]
 		}]);
@@ -367,12 +381,12 @@ fdescribe('Game Service - Cards / Movement', () => {
 
 		assignPieceToSpace(players[1].pieces[0], boardSpaces[16]);
 
-		const { movablePieces } = game.getMovablePiecesForCard(players[0], burningSeven);
+		const { movablePieces } = game.getMovablePiecesForAction(players[0], Actions.burningSeven);
 
 		expect(movablePieces.length).toEqual(1);
 		expect(movablePieces[0].piece).toEqual(players[0].pieces[1]);
 
-		game.executePlayCard(players[0], burningSeven, [{
+		game.executeAction(players[0], Actions.burningSeven, [{
 			piece: players[0].pieces[1],
 			space: boardSpaces[24]
 		}]);
@@ -383,7 +397,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 	it('should allow the same piece to be moved twice', () => {
 		assignPieceToSpace(players[0].pieces[0], boardSpaces[0]);
 
-		game.executePlayCard(players[0], burningSeven, [
+		game.executeAction(players[0], Actions.burningSeven, [
 			{
 				piece: players[0].pieces[0],
 				space: boardSpaces[5],
@@ -412,7 +426,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 		expect(players[0].home.length).toEqual(0);
 		expect(players[0].home.length).toEqual(0);
 
-		game.executePlayCard(players[0], burningSeven, [{
+		game.executeAction(players[0], Actions.burningSeven, [{
 			piece: players[0].pieces[0],
 			space: boardSpaces[7]
 		}]);
@@ -428,7 +442,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 		assignPieceToSpace(players[1].pieces[0], boardSpaces[62]);
 		assignPieceToSpace(players[0].pieces[0], boardSpaces[2]);
 
-		game.executePlayCard(players[1], burningSeven, [{
+		game.executeAction(players[1], Actions.burningSeven, [{
 			piece: players[1].pieces[0],
 			space: boardSpaces[5]
 		}]);
@@ -443,11 +457,11 @@ fdescribe('Game Service - Cards / Movement', () => {
 		assignPieceToSpace(players[0].pieces[0], boardSpaces[0]);
 		assignPieceToSpace(players[0].pieces[1], boardSpaces[8]);
 
-		const { movablePieces } = game.getMovablePiecesForCard(players[0], burningSeven);
+		const { movablePieces } = game.getMovablePiecesForAction(players[0], Actions.burningSeven);
 
 		expect(movablePieces.length).toEqual(2);
 
-		game.executePlayCard(players[0], burningSeven, [
+		game.executeAction(players[0], Actions.burningSeven, [
 			{
 				piece: players[0].pieces[0],
 				space: boardSpaces[3]
@@ -468,18 +482,18 @@ fdescribe('Game Service - Cards / Movement', () => {
 		assignPieceToSpace(players[1].pieces[0], boardSpaces[16]);
 		assignPieceToSpace(players[2].pieces[0], boardSpaces[32]);
 
-		const { movablePieces } = game.getMovablePiecesForCard(players[0], burningSeven);
+		const { movablePieces } = game.getMovablePiecesForAction(players[0], Actions.burningSeven);
 
 		expect(movablePieces.length).toEqual(2);
 		expect(movablePieces[0].spaces.length).toEqual(1);
 		expect(movablePieces[1].spaces.length).toEqual(1);
 
-		game.createFullMoves(players[0], burningSeven, {
+		game.createFullMoves(players[0], Actions.burningSeven, {
 			piece: players[0].pieces[0],
 			space: boardSpaces[15]
 		}).fullMoves.forEach(move => game.performMove(move));
 
-		const { movablePieces: partTwo } = game.getMovablePiecesForCard(players[0], burningSeven, 2);
+		const { movablePieces: partTwo } = game.getMovablePiecesForAction(players[0], Actions.burningSeven, 2);
 
 		expect(partTwo.length).toEqual(1);
 		expect(partTwo[0].spaces.length).toEqual(2);
@@ -492,7 +506,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 		assignPieceToSpace(players[0].pieces[0], boardSpaces[15]);
 		assignPieceToSpace(players[0].pieces[1], boardSpaces[14]);
 
-		const { movablePieces } = game.getMovablePiecesForCard(players[0], burningSeven);
+		const { movablePieces } = game.getMovablePiecesForAction(players[0], Actions.burningSeven);
 
 		expect(movablePieces.length).toEqual(0);
 	});
@@ -505,7 +519,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 		assignPieceToSpace(players[0].pieces[1], boardSpaces[13]);
 		assignPieceToSpace(players[1].pieces[0], boardSpaces[16]);
 
-		const { movablePieces } = game.getMovablePiecesForCard(players[0], burningSeven);
+		const { movablePieces } = game.getMovablePiecesForAction(players[0], Actions.burningSeven);
 
 		expect(movablePieces.length).toEqual(1);
 		expect(movablePieces[0].piece).toEqual(players[0].pieces[1]);
@@ -518,14 +532,14 @@ fdescribe('Game Service - Cards / Movement', () => {
 	//
 
 	it('should allow a piece to be started', () => {
-		const { movablePieces } = game.getMovablePiecesForCard(players[0], new Card({ startable: true }));
+		const { movablePieces } = game.getMovablePiecesForAction(players[0], Actions.startable);
 
 		expect(movablePieces.length).toEqual(1);
 		expect(movablePieces[0].piece).toEqual(players[0].home[0]);
 		expect(movablePieces[0].spaces.length).toEqual(1);
 		expect(movablePieces[0].spaces[0]).toEqual(boardSpaces[0]);
 
-		game.executePlayCard(players[0], startCard, [{
+		game.executeAction(players[0], Actions.startable, [{
 			piece: players[0].home[0],
 			space: boardSpaces[0]
 		}]);
@@ -538,7 +552,7 @@ fdescribe('Game Service - Cards / Movement', () => {
 	it('should not allow a piece to be started if home is already occupied by own piece', () => {
 		assignPieceToSpace(players[0].pieces[0], boardSpaces[0]);
 
-		const { movablePieces } = game.getMovablePiecesForCard(players[0], new Card({ startable: true }));
+		const { movablePieces } = game.getMovablePiecesForAction(players[0], Actions.startable);
 		expect(movablePieces.length).toEqual(0);
 	});
 
@@ -547,10 +561,10 @@ fdescribe('Game Service - Cards / Movement', () => {
 
 		expect(players[1].home.length).toEqual(3);
 
-		const { movablePieces } = game.getMovablePiecesForCard(players[0], startCard);
+		const { movablePieces } = game.getMovablePiecesForAction(players[0], Actions.startable);
 		expect(movablePieces.length).toEqual(1);
 
-		game.executePlayCard(players[0], startCard, [{
+		game.executeAction(players[0], Actions.startable, [{
 			piece: players[0].home[0],
 			space: boardSpaces[0]
 		}]);

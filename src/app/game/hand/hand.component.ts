@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, SimpleChanges, OnChanges, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { Card } from '../card.model';
 import { Player } from '../player.model';
 import { Subscription } from 'rxjs';
@@ -31,7 +31,10 @@ export class HandComponent implements OnInit, OnDestroy {
 
 	buildHand(): void {
 
-		const { player: { hand: cards = [] } } = this.game;
+		const { player } = this.game;
+		const { hand: cards = [] } = player;
+
+		const usableCards = this.game.getUsableCards(player);
 
 		const ROTATION_INTERVAL = 6;
 		const HORIZONTAL_SPACING = 40;
@@ -47,7 +50,8 @@ export class HandComponent implements OnInit, OnDestroy {
 				rotation: startingRotation + index * ROTATION_INTERVAL,
 				left: startingLeft + index * HORIZONTAL_SPACING,
 				top: startingTop + index * VERTICAL_SPACING,
-				active: false
+				active: false,
+				playable: !!usableCards.find(usableCard => usableCard.card === card)
 			};
 		});
 	}

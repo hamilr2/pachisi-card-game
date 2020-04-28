@@ -11,7 +11,7 @@ describe('PlayerCornerComponent', () => {
 
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
-			imports: [ HttpClientTestingModule ], 
+			imports: [ HttpClientTestingModule ],
 			providers: [ GameService ],
 			declarations: [ PlayerCornerComponent ]
 		})

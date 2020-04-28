@@ -1,16 +1,15 @@
-import { Card, CardSpecials } from './card.model';
 import { Injectable } from '@angular/core';
-import { StorageService } from '../storage.service';
-import { Space } from './space.model';
-import { Player } from './player.model';
-import { Piece } from './piece.model';
-import { CardResult, MovablePiece, UsableCard, FlatMove, MoveResult, FullMove } from './interfaces';
 import { Subject } from 'rxjs';
 import { LiveService } from '../live.service';
-import { GameLogItem, GameLogActions, FlatGameLogItem } from './game-log-item.interface';
+import { StorageService } from '../storage.service';
 import * as DogUtil from '../util.util';
+import { Card, CardAction, CardSpecials } from './card.model';
 import * as Decks from './deck/decks.util';
-import { Move } from './interfaces';
+import { FlatGameLogItem, GameLogActions, GameLogItem } from './game-log-item.interface';
+import { CardResult, FlatMove, FullMove, MovablePiece, Move, MoveResult, UsableAction, UsableCard } from './interfaces';
+import { Piece } from './piece.model';
+import { Player } from './player.model';
+import { Space } from './space.model';
 
 const HAND_SIZE = 6;
 const DEFAULT_CARD_QUANTITY = 8;
@@ -136,11 +135,20 @@ export class GameService {
 
 	getUsableCards(player): UsableCard[] {
 		return player.hand.reduce((usableCards: UsableCard[], card: Card) => {
-			const { movablePieces } = this.getMovablePiecesForCard(player, card);
-			if (movablePieces.length) {
+			const usableActions = card.actions.reduce((actions: UsableAction[], action: CardAction) => {
+				const { movablePieces: thesePieces } = this.getMovablePiecesForAction(player, action);
+				if (thesePieces.length) {
+					actions.push({
+						action,
+						movablePieces: thesePieces
+					});
+				}
+				return actions;
+			}, []);
+			if (usableActions.length) {
 				usableCards.push({
 					card,
-					movablePieces
+					usableActions
 				});
 			}
 			return usableCards;
@@ -178,14 +186,19 @@ export class GameService {
 
 		// prioritize moves
 		const cardToPlay = usableCards[0].card;
-		const pieceToMove = usableCards[0].movablePieces[0].piece;
-		// if it's a seven or joker, move max spaces
-		const spaceToMoveTo = usableCards[0].movablePieces[0].spaces.slice(-1)[0];
+		const actionToUse = usableCards[0].usableActions[0];
+		const pieceToMove = actionToUse.movablePieces[0].piece;
+		const spaceToMoveTo = actionToUse.movablePieces[0].spaces.slice(-1)[0]; // use the max number of spaces
+
+		// needs some more Burning Seven logic to add more moves
+
 		this.delayUI(() => {
-			this.playCard(player, cardToPlay, [{
+			const moves = [{
 				piece: pieceToMove,
 				space: spaceToMoveTo
-			}]);
+			}];
+			const action = cardToPlay.actions[0];
+			this.playCard(player, cardToPlay, action, moves);
 		});
 	}
 
@@ -282,13 +295,13 @@ export class GameService {
 		});
 	}
 
-	public getMovablePiecesForCard(player: Player, card: Card, burningRemaining?: number): CardResult {
+	public getMovablePiecesForAction(player: Player, action: CardAction, burningRemaining?: number): CardResult {
 		const errorMessage = '';
 
 		const movablePieces: MovablePiece[] = [];
 		let movementOptions: number[] = [];
 
-		if (card.startable) {
+		if (action.startable) {
 			if (player.home.length && !(player.spaces[0].piece && player.spaces[0].piece.player === player)) {
 				movablePieces.push({
 					piece: player.home[0],
@@ -297,13 +310,13 @@ export class GameService {
 			}
 		}
 
-		if (card.special === CardSpecials.BURNING) {
-			burningRemaining = burningRemaining || card.value;
+		if (action.special === CardSpecials.BURNING) {
+			burningRemaining = burningRemaining || action.value;
 			movementOptions = new Array(burningRemaining).fill(0).map((value, index) => index + 1);
-		} else if (card.values) {
-			movementOptions = card.values;
-		} else if (card.basic) {
-			movementOptions = [card.value];
+		} else if (action.values) {
+			movementOptions = action.values;
+		} else if (action.value) {
+			movementOptions = [action.value];
 		}
 
 		const boardPieces = player.pieces.filter((piece: Piece) => !!piece.space);
@@ -311,11 +324,12 @@ export class GameService {
 		if (boardPieces.length !== 0) {
 
 			this.recursions = 0;
-			movablePieces.push(...this.getAndCheckMovablePiecesRecursive(player, boardPieces, card, movementOptions, burningRemaining || card.value));
-			//console.log(this.recursions);
+			const value = burningRemaining || action.value;
+			movablePieces.push(...this.getAndCheckMovablePiecesRecursive(player, boardPieces, action, movementOptions, value));
+			// console.log(this.recursions);
 
 			// Add in swap options
-			if (card.special === CardSpecials.SWAP || card.special === CardSpecials.JOKER) {
+			if (action.special === CardSpecials.SWAP) {
 				const destinationPieces = this.pieces.filter(piece => {
 					const isOtherPiece = piece.player !== player;
 					const onBoard = piece.space && !piece.space.isGoal && !piece.space.isStart;
@@ -345,12 +359,18 @@ export class GameService {
 		};
 	}
 
-	getAndCheckMovablePiecesRecursive(player: Player, consideredPieces: Piece[], card: Card, movementOptions: number[], moveValue: number) {
+	getAndCheckMovablePiecesRecursive(
+		player: Player,
+		consideredPieces: Piece[],
+		action: CardAction,
+		movementOptions: number[],
+		moveValue: number
+	) {
 		// Get spaces that can be moved to
 		this.recursions++;
 		if (movementOptions.length && consideredPieces.length) {
 			const movablePieces = this.getMovablePiecesForMovementOptions(consideredPieces, movementOptions);
-			if (card.special !== CardSpecials.BURNING) {
+			if (action.special !== CardSpecials.BURNING) {
 				return movablePieces;
 			} else {
 				// here we go
@@ -365,14 +385,15 @@ export class GameService {
 						const filteredSpaces = spaces.filter(space => {
 							// Make a mock move and see what happens
 							const spacesMoved = this.getDistanceBetweenSpaces(piece.space, space);
-							const { fullMoves } = this.createFullMoves(player, card, {
+							const { fullMoves } = this.createFullMoves(player, action, {
 								piece,
 								space
 							});
 							fullMoves.forEach(this.performMove.bind(this));
 							const filteredPieces = consideredPieces.filter(thisPiece => thisPiece !== piece);
-							const newMovementOptions = new Array(moveValue - spacesMoved).fill(0).map((value, index) => index + 1);
-							const recurseMovablePieces = this.getAndCheckMovablePiecesRecursive(player, filteredPieces, card, newMovementOptions, moveValue - spacesMoved);
+							const newMovementOptions = new Array(moveValue - spacesMoved).fill(0).map(({}, index) => index + 1);
+							const value = moveValue - spacesMoved;
+							const recurseMovablePieces = this.getAndCheckMovablePiecesRecursive(player, filteredPieces, action, newMovementOptions, value);
 							// Reset local state
 							fullMoves.forEach(this.undoMove.bind(this));
 							// check if there are options
@@ -505,9 +526,9 @@ export class GameService {
 		}
 	}
 
-	public playCard(player: Player, card: Card, moveSet: Move[]): void {
+	public playCard(player: Player, card: Card, action: CardAction, moveSet: Move[]): void {
 		if (this.location === 'local') {
-			this.attemptPlayCard(player, card, moveSet);
+			this.attemptPlayCard(player, card, action, moveSet);
 		} else {
 			this.sendAction({
 				action: GameLogActions.PLAY,
@@ -518,9 +539,9 @@ export class GameService {
 		}
 	}
 
-	attemptPlayCard(player: Player, card: Card, moveSet: Move[]): boolean {
+	attemptPlayCard(player: Player, card: Card, action: CardAction, moveSet: Move[]): boolean {
 
-		const errorMessage = this.executePlayCard(player, card, moveSet);
+		const errorMessage = this.executeAction(player, action, moveSet);
 
 		if (errorMessage) {
 			alert(errorMessage);
@@ -539,12 +560,12 @@ export class GameService {
 		return true;
 	}
 
-	executePlayCard(player: Player, card: Card, moveSet: Move[]): string {
+	executeAction(player: Player, action: CardAction, moveSet: Move[]): string {
 
-		if (card.special !== CardSpecials.BURNING) {
+		if (action.special !== CardSpecials.BURNING) {
 			// Validate player/card/piece/space combo is valid
 			const { piece, space } = moveSet[0];
-			const { movablePieces } = this.getMovablePiecesForCard(player, card);
+			const { movablePieces } = this.getMovablePiecesForAction(player, action);
 			const foundPiece = movablePieces.find((movablePiece: MovablePiece) => {
 				return movablePiece.piece === piece;
 			});
@@ -563,7 +584,7 @@ export class GameService {
 		let error = '';
 
 		moveSet.forEach(move => {
-			const result = this.createFullMoves(player, card, move);
+			const result = this.createFullMoves(player, action, move);
 			if (result.errorMessage) {
 				error = result.errorMessage;
 			} else {
@@ -579,12 +600,12 @@ export class GameService {
 		return error;
 	}
 
-	createFullMoves(player, card, move): MoveResult {
+	createFullMoves(player: Player, action: CardAction, move: Move): MoveResult {
 		const fullMoves: FullMove[] = [];
 		const { space, piece } = move;
 		let errorMessage = '';
 
-		if (card.startable && !piece.space) {
+		if (action.startable && !piece.space) {
 			if (player.home.length > 0) {
 				const startSpace = player.spaces[0];
 
@@ -613,7 +634,7 @@ export class GameService {
 			});
 
 			// Send all passed pieces home
-			if (card.special === CardSpecials.BURNING) {
+			if (action.special === CardSpecials.BURNING) {
 				let spaceIterator = piece.space;
 				while (spaceIterator !== space) {
 					// stop if we're on own home and headed into goal
@@ -637,7 +658,7 @@ export class GameService {
 					fullMoves.push({
 						piece: space.piece,
 						startSpace: space,
-						endSpace: card.special === CardSpecials.SWAP ? oldSpace : null
+						endSpace: action.special === CardSpecials.SWAP ? oldSpace : null
 					});
 				}
 			}
@@ -796,7 +817,7 @@ export class GameService {
 		// console.log('Handle Message', item.action, item.player && item.player.name, item);
 
 		if (item.action === PLAY) {
-			this.attemptPlayCard(item.player, item.card, item.moveSet);
+			this.attemptPlayCard(item.player, item.card, item.cardAction, item.moveSet);
 		} else if (item.action === DISCARD || item.action === DISCARD_DRAW) {
 			this.executeDiscardCard(item.player, item.card);
 			if (this.hasDiscarded && item.player.onlineStatus === 'bot') {
@@ -837,7 +858,7 @@ export class GameService {
 				return {
 					piece: this.pieces.find(piece => piece.id === pieceId),
 					space: this.spaces.find(space => space.id === spaceId)
-				}
+				};
 			});
 		}
 

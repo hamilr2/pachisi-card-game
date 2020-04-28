@@ -1,18 +1,21 @@
-import { Component, EventEmitter, OnInit, Input, Output } from '@angular/core';
-import { Card } from '../../card.model';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Card, CardAction } from '../../card.model';
 import { GameService } from '../../game.service';
 import { InterfaceService } from '../../interface.service';
-import { Player } from '../../player.model';
 
 @Component({
 	selector: 'app-hand-card',
 	templateUrl: './hand-card.component.html',
 	styleUrls: ['./hand-card.component.css']
 })
+
 export class HandCardComponent implements OnInit {
 	@Input() card: Card;
 	@Input() active: boolean;
+	@Input() playable: boolean;
 	@Output() activeChange = new EventEmitter<{card: Card, active: boolean}>();
+
+	CardActions: CardAction[];
 
 	constructor(private game: GameService, public interfaceService: InterfaceService) { }
 
@@ -24,13 +27,6 @@ export class HandCardComponent implements OnInit {
 
 	isPlayDisabled() {
 		return this.isBeingPlayed() || this.game.activePlayer !== this.game.player;
-	}
-
-	isPlayable() {
-		// Consider adjusting this to the hand
-		const player: Player = this.interfaceService.player;
-		const movablePieces = this.game.getMovablePiecesForCard(player, this.card).movablePieces;
-		return !!movablePieces.length;
 	}
 
 	onClickCard() {
@@ -45,12 +41,17 @@ export class HandCardComponent implements OnInit {
 
 	onClickPlay(e: Event) {
 		e.stopPropagation();
-		this.interfaceService.attemptPlayCard(this.card);
+		this.interfaceService.attemptPlayCard(this.card, this.card.actions[0]);
 	}
 
 	onClickDiscard(e: Event) {
 		e.stopPropagation();
 		this.game.discardCard(this.interfaceService.player, this.card);
+	}
+
+	onClickAction(action: CardAction, e: Event) {
+		e.stopPropagation();
+		this.interfaceService.attemptPlayCard(this.card, action);
 	}
 
 }

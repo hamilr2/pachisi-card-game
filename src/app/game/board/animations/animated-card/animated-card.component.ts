@@ -1,5 +1,5 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { trigger, state, style, transition, animate, AnimationEvent } from '@angular/animations';
+import { animate, AnimationEvent, state, style, transition, trigger } from '@angular/animations';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AnimatedCard } from '../animations.component';
 
 @Component({
@@ -64,7 +64,6 @@ export class AnimatedCardComponent implements OnInit {
 	}
 
 	onDone(event: AnimationEvent) {
-		// console.log('Done Fired...?', this.cardState, event);
 		if (event.fromState !== 'void') {
 			this.done.emit();
 		}

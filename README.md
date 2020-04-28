@@ -1,22 +1,39 @@
 # Dog
 
-An implementation of the popular Swiss card game Dog. The cards and graphics of this implementation are based on the retail version released by Schmidt Spiele. An English version of the rules of the game can be found [here](http://www.dogspiel.info/images/pdfs/regeln/rules.pdf). More information on the game, including its history and other variants, can be found [here](http://www.dogspiel.info/index.php).
+An implementation of the popular Swiss card game Dog, which is similar to other [Cross-and-Circlce](https://en.wikipedia.org/wiki/Cross_and_circle_game) games like [Sorry](https://en.wikipedia.org/wiki/Sorry!_(game)), [Trouble](https://en.wikipedia.org/wiki/Trouble_(board_game)), [Mensch ärgere Dich nicht](https://en.wikipedia.org/wiki/Mensch_%C3%A4rgere_Dich_nicht), [Parcheesi](https://en.wikipedia.org/wiki/Parcheesi), or [Pachisi](https://en.wikipedia.org/wiki/Pachisi), but played with a hand of cards instead of dice. The cards and graphics of this implementation are based on the retail version released by Schmidt Spiele. An English version of the rules of the game can be found [here](http://www.dogspiel.info/images/pdfs/regeln/rules.pdf). More information on the game, including its history and other variants, can be found [here](http://www.dogspiel.info/index.php).
 
-The online version of this game makes use (abuses?) Firebase's Real-time Database until a Node back-end is written.
+This project offers solo play vs bots and online play with other humans and/or bots.
 
-The core GameService logic is under test; component tests are stubbed out.
+## Dependencies
+* Node / NPM
+* Firebase (optional)
+
+## Basic Usage
+* Run `npm install`
+* Copy and rename `/src/environments/environment.prod.copy.ts` to remove `.copy`.
+* Copy and rename _again_ to remove `.prod` (or run `ng build --prod`)
+* Optionally, to play/host games online, create a new Firebase project, enable Real Time Database, and set the url in the environment to your project
+* Start the app with `ng serve`
+* Navigate to http://localhost:4200.
+
+## Further Notes
+* The online version of this game makes use (abuses?) Firebase's Real-time Database. Because the game does not implement auth, it required full read/write access to a Firebase instance, which is a security issue. Online play therefore should not be enabled in a production enironment. Ideally / Eventually the server code will be moved to either a dedicated Node server, or Firebase functions.
+* The game can be easily deployed to Firebase static hosting
+* The core game logic is under test; component tests are stubbed out. Tests can be run with `ng test`.
+
 
 ## Todo List
 
 #### Cards
 * ~~ Burning Seven ~~
 * ~~ Swap ~~
-* Joker -- selection of Burning Seven / Swap
+* ~~ Joker -- selection of Burning Seven / Swap ~~
 
 #### Game Logic
 * ~~ No passing other home players ~~
 * ~~ Send to Home (possibly even own piece) ~~
 * ~~ In-goal movement (no -4?) ~~
+* No jumping over pieces in home
 * Pre-round card swap
 * Victory condition detection
 * Rotate starting player clockwise each round
@@ -28,6 +45,7 @@ The core GameService logic is under test; component tests are stubbed out.
 * 2, 3, 5 player solo - show hand on discard
 
 #### Bot AI
+* Fix Burning implementation
 * Better selection of Card
 * Better selection of Piece
 * Card Swap
@@ -46,7 +64,7 @@ The core GameService logic is under test; component tests are stubbed out.
 * Expandable Activity Log (and persistence)
 
 #### Graphics
-* Card playing button re-work ( + joker selection?)
+* Card Button re-work
 * Burning Seven special treatment
 * Pre-animate own card plays/discards to eliminate lag
 * Animate away cards from hand
@@ -63,22 +81,3 @@ The core GameService logic is under test; component tests are stubbed out.
 #### Development
 * More Test Cases
 * Clean up component test warnings
-
-## Leftover Angular CLI auto-gen stuff
-
-### Development server
-
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
-
-
-### Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-### Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-### Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).

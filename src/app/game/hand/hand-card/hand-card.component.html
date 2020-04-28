@@ -3,15 +3,10 @@
 	(click)="onClickCard()"
 	[ngClass]="{
 		clicked: !!active,
-		'not-playable': !isPlayable()
+		'not-playable': !playable
 	}"
 >
 	<div *ngIf="active === true" class="controls">
-		<button
-			*ngIf="isPlayable()"
-			(click)="onClickPlay($event)"
-			[disabled]="isPlayDisabled()"
-		>{{ isBeingPlayed() ? 'Playing' : 'Play' }}</button>
 		<button 
 			*ngIf="interfaceService.discardNecessary"
 			(click)="onClickDiscard($event)"
@@ -19,8 +14,21 @@
 		<button
 			*ngIf="isBeingPlayed()"
 			(click)="onClickCancel($event)"
-			class="cancelButton"
+			class="cardButton redButton"
 		>Cancel</button>
+
+		<button
+			*ngIf="playable && card.actions.length == 1"
+			(click)="onClickAction(card.actions[0], $event)"
+			[disabled]="isPlayDisabled()"
+		>Play</button>
+		<div *ngIf="card.actions.length > 1" class="play-actions">
+			<button
+				*ngFor="let cardAction of card.actions"
+				(click)="onClickAction(cardAction, $event)"
+			>{{ cardAction.text}}
+			</button>
+		</div>
 	</div>
-	<div class="error-text" *ngIf="!isPlayable()">Not Playable</div>
+	<div class="error-text" *ngIf="!playable">Not Playable</div>
 </app-card>

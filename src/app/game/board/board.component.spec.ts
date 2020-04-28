@@ -1,9 +1,8 @@
-import { async, ComponentFixture, TestBed, inject } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { BoardComponent } from './board.component';
 import { GameService } from '../game.service';
-import { Inject } from '@angular/core';
 
 describe('BoardComponent', () => {
 	let component: BoardComponent;
