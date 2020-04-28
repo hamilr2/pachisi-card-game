@@ -1,8 +1,19 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-
-import { BoardComponent } from './board.component';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { CardComponent } from '../card/card.component';
+import { DeckComponent } from '../deck/deck.component';
 import { GameService } from '../game.service';
+import { InterfaceService } from '../interface.service';
+import { PlayerCornerComponent } from '../player-corner/player-corner.component';
+import { AnimationsComponent } from './animations/animations.component';
+import { BoardComponent } from './board.component';
+import { GoalComponent } from './goal/goal.component';
+import { HomeComponent } from './home/home.component';
+import { PieceComponent } from './piece/piece.component';
+import { QuartileComponent } from './quartile/quartile.component';
+import { SpaceSetComponent } from './quartile/space-set/space-set.component';
+import { SpaceComponent } from './space/space.component';
+
 
 describe('BoardComponent', () => {
 	let component: BoardComponent;
@@ -11,8 +22,20 @@ describe('BoardComponent', () => {
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
 			imports: [ HttpClientTestingModule ],
-			providers: [ GameService ],
-			declarations: [ BoardComponent ]
+			providers: [ GameService, InterfaceService ],
+			declarations: [
+				BoardComponent,
+				QuartileComponent,
+				DeckComponent,
+				CardComponent,
+				AnimationsComponent,
+				PlayerCornerComponent,
+				HomeComponent,
+				GoalComponent,
+				SpaceSetComponent,
+				SpaceComponent,
+				PieceComponent
+			]
 		})
 		.compileComponents();
 	}));

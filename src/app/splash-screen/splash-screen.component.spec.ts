@@ -1,6 +1,9 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { RouterTestingModule } from '@angular/router/testing';
+import { LobbyComponent } from '../lobby/lobby.component';
 import { SplashScreenComponent } from './splash-screen.component';
+
 
 describe('SplashScreenComponent', () => {
 	let component: SplashScreenComponent;
@@ -8,7 +11,8 @@ describe('SplashScreenComponent', () => {
 
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
-			declarations: [ SplashScreenComponent ]
+			imports: [ HttpClientTestingModule, RouterTestingModule ],
+			declarations: [ SplashScreenComponent, LobbyComponent ]
 		})
 		.compileComponents();
 	}));

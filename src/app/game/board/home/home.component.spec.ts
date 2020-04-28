@@ -1,10 +1,13 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-
-import { HomeComponent } from './home.component';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameService } from '../../game.service';
 import { InterfaceService } from '../../interface.service';
 import { Player } from '../../player.model';
+import { PieceComponent } from '../piece/piece.component';
+import { SpaceSetComponent } from '../quartile/space-set/space-set.component';
+import { SpaceComponent } from '../space/space.component';
+import { HomeComponent } from './home.component';
+
 
 describe('HomeComponent', () => {
 	let component: HomeComponent;
@@ -14,7 +17,7 @@ describe('HomeComponent', () => {
 		TestBed.configureTestingModule({
 			imports: [ HttpClientTestingModule, ],
 			providers: [ GameService, InterfaceService ],
-			declarations: [ HomeComponent ]
+			declarations: [ HomeComponent, SpaceSetComponent, SpaceComponent, PieceComponent ]
 		})
 		.compileComponents();
 	}));

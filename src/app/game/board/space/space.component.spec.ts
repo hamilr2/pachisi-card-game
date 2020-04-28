@@ -1,9 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { SpaceComponent } from './space.component';
 import { InterfaceService } from '../../interface.service';
-import { Space } from '../../space.model';
 import { Player } from '../../player.model';
+import { Space } from '../../space.model';
+import { PieceComponent } from '../piece/piece.component';
+import { SpaceComponent } from './space.component';
+
 
 describe('SpaceComponent', () => {
 	let component: SpaceComponent;
@@ -12,7 +13,7 @@ describe('SpaceComponent', () => {
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
 			providers: [ InterfaceService ],
-			declarations: [ SpaceComponent ]
+			declarations: [ SpaceComponent, PieceComponent ]
 		})
 		.compileComponents();
 	}));

@@ -80,4 +80,4 @@ This project offers solo play vs bots and online play with other humans and/or b
 
 #### Development
 * More Test Cases
-* Clean up component test warnings
+* ~~ Clean up component test warnings ~~

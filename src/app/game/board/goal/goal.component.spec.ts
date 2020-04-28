@@ -1,7 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { GoalComponent } from './goal.component';
+import { InterfaceService } from '../../interface.service';
 import { Player } from '../../player.model';
+import { PieceComponent } from '../piece/piece.component';
+import { SpaceSetComponent } from '../quartile/space-set/space-set.component';
+import { SpaceComponent } from '../space/space.component';
+import { GoalComponent } from './goal.component';
+
 
 describe('GoalComponent', () => {
 	let component: GoalComponent;
@@ -9,7 +13,8 @@ describe('GoalComponent', () => {
 
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
-			declarations: [ GoalComponent ]
+			providers: [ InterfaceService ],
+			declarations: [ GoalComponent, SpaceSetComponent, SpaceComponent, PieceComponent ]
 		})
 		.compileComponents();
 	}));

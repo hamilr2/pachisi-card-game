@@ -1,8 +1,11 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-
-import { HandComponent } from './hand.component';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { CardComponent } from '../card/card.component';
 import { GameService } from '../game.service';
+import { InterfaceService } from '../interface.service';
+import { HandCardComponent } from './hand-card/hand-card.component';
+import { HandComponent } from './hand.component';
+
 
 describe('HandComponent', () => {
 	let component: HandComponent;
@@ -11,8 +14,8 @@ describe('HandComponent', () => {
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
 			imports: [ HttpClientTestingModule ],
-			providers: [ GameService ],
-			declarations: [ HandComponent ]
+			providers: [ GameService, InterfaceService ],
+			declarations: [ HandComponent, HandCardComponent, CardComponent ]
 		})
 		.compileComponents();
 	}));

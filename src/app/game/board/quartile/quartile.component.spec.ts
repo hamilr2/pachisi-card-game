@@ -1,9 +1,15 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-
-import { QuartileComponent } from './quartile.component';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameService } from '../../game.service';
+import { InterfaceService } from '../../interface.service';
 import { Player } from '../../player.model';
+import { GoalComponent } from '../goal/goal.component';
+import { HomeComponent } from '../home/home.component';
+import { PieceComponent } from '../piece/piece.component';
+import { SpaceComponent } from '../space/space.component';
+import { QuartileComponent } from './quartile.component';
+import { SpaceSetComponent } from './space-set/space-set.component';
+
 
 describe('QuartileComponent', () => {
 	let component: QuartileComponent;
@@ -12,8 +18,15 @@ describe('QuartileComponent', () => {
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
 			imports: [ HttpClientTestingModule ],
-			providers: [ GameService ],
-			declarations: [ QuartileComponent ]
+			providers: [ GameService, InterfaceService ],
+			declarations: [
+				QuartileComponent,
+				HomeComponent,
+				GoalComponent,
+				SpaceSetComponent,
+				SpaceComponent,
+				PieceComponent
+			]
 		})
 		.compileComponents();
 	}));

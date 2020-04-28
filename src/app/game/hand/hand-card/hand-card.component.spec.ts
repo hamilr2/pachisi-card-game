@@ -8,7 +8,7 @@ import { InterfaceService } from '../../interface.service';
 import { HandCardComponent } from './hand-card.component';
 
 
-fdescribe('HandCardComponent', () => {
+describe('HandCardComponent', () => {
 	let component: HandCardComponent;
 	let fixture: ComponentFixture<HandCardComponent>;
 
