@@ -168,6 +168,7 @@ export class StorageService {
 
 		const propertiesToSaveDirectly = [
 			'id',
+			'rules',
 			'turn',
 			'round',
 			'hasDiscarded',
@@ -216,7 +217,7 @@ export class StorageService {
 		const { flatPlayers, flatSpaces, flatPieces, deckCardIds = [], discardCardIds = [], ...newGame }: FlatGame & Partial<any> = flatGame;
 
 		newGame.cards = newGame.cards.map(card => new Card(card));
-		newGame.players = flatPlayers.map(player => new Player(player));
+		newGame.players = flatPlayers.map(player => new Player(player, newGame.rules));
 		newGame.pieces = flatPieces.map(piece => new Piece(piece));
 		newGame.spaces = flatSpaces.map(flatSpace => {
 			const { playerId, pieceId, ...spaceOptions }: FlatSpace & Partial<SpaceOptions> = flatSpace;

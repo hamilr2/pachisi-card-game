@@ -1,8 +1,8 @@
-import { Piece } from './piece.model';
 import { Card } from './card.model';
+import { GameRules } from './game.service';
+import { Piece } from './piece.model';
 import { Space } from './space.model';
 
-const NUMBER_OF_PIECES = 4;
 const GOAL_SIZE = 4;
 const SPACES_PER_PLAYER = 16;
 
@@ -38,11 +38,11 @@ export class Player {
 	onlineStatus = 'bot';
 	host = false;
 
-	constructor(options: PlayerOptions) {
+	constructor(options: PlayerOptions, rules: GameRules) {
 		Object.assign(this, options);
 
-		this.pieces = new Array(NUMBER_OF_PIECES).fill({}).map(({}, index) => new Piece({
-			id: Number(this.id * NUMBER_OF_PIECES + index),
+		this.pieces = new Array(rules.numberOfPieces).fill({}).map(({}, index) => new Piece({
+			id: Number(this.id * rules.numberOfPieces + index),
 			color: this.color,
 			player: this
 		}));

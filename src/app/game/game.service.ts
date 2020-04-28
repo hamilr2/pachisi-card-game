@@ -17,12 +17,31 @@ const ACTION_DELAY = 3500;
 export const NUMBER_OF_PLAYERS = 4;
 const RULE_VARIANT_LAND_ON_OWN_PIECE = true;
 
+export interface GameRules {
+	useTeams?: boolean;
+	boardSize?: number;
+	numberOfPlayers?: number;
+	useDiscardRule?: boolean;
+	playerOrderAntiClockwise?: boolean;
+	numberOfPieces?: number;
+}
+
+const RuleDefaults: GameRules = {
+	useTeams: false,
+	boardSize: 4,
+	numberOfPlayers: 4,
+	useDiscardRule: true,
+	playerOrderAntiClockwise: false,
+	numberOfPieces: 4
+};
+
 @Injectable()
 
 export class GameService {
 
 	gameId: number;
 	location: string;
+	rules: GameRules;
 	isLoaded = false;
 
 	log: GameLogItem[] = [];
@@ -252,7 +271,12 @@ export class GameService {
 		});
 	}
 
-	newGame(): void {
+	newGame(rules: GameRules = {}): void {
+		this.rules = {
+			...RuleDefaults,
+			...rules
+		};
+
 		this.discard = [];
 		this.hasDiscarded = false;
 		this.round = 1;
@@ -761,7 +785,7 @@ export class GameService {
 				color: colors[i],
 				id: i,
 				name: names[i]
-			}));
+			}, this.rules));
 		}
 	}
 

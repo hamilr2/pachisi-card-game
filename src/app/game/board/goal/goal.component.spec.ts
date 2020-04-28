@@ -1,4 +1,6 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { GameService } from '../../game.service';
 import { InterfaceService } from '../../interface.service';
 import { Player } from '../../player.model';
 import { PieceComponent } from '../piece/piece.component';
@@ -10,10 +12,12 @@ import { GoalComponent } from './goal.component';
 describe('GoalComponent', () => {
 	let component: GoalComponent;
 	let fixture: ComponentFixture<GoalComponent>;
+	let game: GameService;
 
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
-			providers: [ InterfaceService ],
+			imports: [ HttpClientTestingModule ],
+			providers: [ InterfaceService, GameService ],
 			declarations: [ GoalComponent, SpaceSetComponent, SpaceComponent, PieceComponent ]
 		})
 		.compileComponents();
@@ -22,11 +26,15 @@ describe('GoalComponent', () => {
 	beforeEach(() => {
 		fixture = TestBed.createComponent(GoalComponent);
 		component = fixture.componentInstance;
+		game = TestBed.inject(GameService);
+		game.newGame();
+
 		component.player = new Player({
 			color: 'red',
 			id: 0,
 			name: 'Red'
-		});
+		}, game.rules);
+
 		fixture.detectChanges();
 	});
 

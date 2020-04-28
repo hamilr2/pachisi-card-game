@@ -18,12 +18,20 @@ describe('Game Service - Basics', () => {
 		});
 
 		game = TestBed.inject(GameService);
-		game.newGame();
 	});
 
-	it('should have four players', () => {
+	it('should defualt to four players', () => {
+		game.newGame();
 		expect(game.players.length).toEqual(4);
 	});
+
+	it('should allow overwriting default rules', () => {
+		game.newGame({
+			boardSize: 6,
+			numberOfPlayers: 6
+		});
+		game.newGame();
+	})
 });
 
 describe('Game Service - Cards / Movement', () => {

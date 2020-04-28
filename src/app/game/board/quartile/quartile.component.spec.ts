@@ -14,6 +14,7 @@ import { SpaceSetComponent } from './space-set/space-set.component';
 describe('QuartileComponent', () => {
 	let component: QuartileComponent;
 	let fixture: ComponentFixture<QuartileComponent>;
+	let game: GameService;
 
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
@@ -34,11 +35,15 @@ describe('QuartileComponent', () => {
 	beforeEach(() => {
 		fixture = TestBed.createComponent(QuartileComponent);
 		component = fixture.componentInstance;
+		game = TestBed.inject(GameService);
+		game.newGame();
+
 		component.player = new Player({
 			color: 'red',
 			id: 0,
 			name: 'Red'
-		});
+		}, game.rules);
+
 		fixture.detectChanges();
 	});
 

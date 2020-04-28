@@ -12,6 +12,7 @@ import { HomeComponent } from './home.component';
 describe('HomeComponent', () => {
 	let component: HomeComponent;
 	let fixture: ComponentFixture<HomeComponent>;
+	let game: GameService;
 
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
@@ -25,11 +26,15 @@ describe('HomeComponent', () => {
 	beforeEach(() => {
 		fixture = TestBed.createComponent(HomeComponent);
 		component = fixture.componentInstance;
+		game = TestBed.inject(GameService);
+		game.newGame();
+
+
 		component.player = new Player({
 			color: 'red',
 			id: 0,
 			name: 'Red'
-		});
+		}, game.rules);
 
 		fixture.detectChanges();
 	});
