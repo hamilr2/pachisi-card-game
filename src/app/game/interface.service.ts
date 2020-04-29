@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { GameService } from './game.service';
-import { Piece } from './piece.model';
-import { Space } from './space.model';
-import { Card, CardSpecials, CardAction } from './card.model';
-import { Player } from './player.model';
-import { MovablePiece, Move, FullMove } from './interfaces';
 import { Subject } from 'rxjs';
+import { Card, CardAction, CardSpecials } from './card.model';
+import { GameService } from './game.service';
+import { FullMove, MovablePiece, Move } from './interfaces';
+import { Piece } from './piece.model';
+import { Player } from './player.model';
+import { Space } from './space.model';
 
 @Injectable()
 
@@ -18,6 +18,7 @@ export class InterfaceService {
 	activeAction: CardAction;
 	activePiece: Piece;
 
+	selectingSwap = false;
 	selectingPiece = false;
 	selectingSpace = false;
 
@@ -52,7 +53,9 @@ export class InterfaceService {
 	}
 
 	onUpdate() {
-		this.discardNecessary = this.isDiscardNecessary();
+		// discard is never necessary for swap round
+		this.discardNecessary = this.game.turn !== 0 && this.isDiscardNecessary();
+		this.selectingSwap = this.game.turn === 0 && !this.player.swapCard;
 	}
 
 	isDiscardNecessary(player: Player = this.player) {
@@ -131,6 +134,11 @@ export class InterfaceService {
 		}
 		this.game.playCard(this.player, this.activeCard, this.activeAction, this.moveSet);
 		this.reset();
+	}
+
+	selectSwap(card) {
+		this.selectingSwap = false;
+		this.game.selectCardForSwap(this.player, card);
 	}
 
 	reset() {

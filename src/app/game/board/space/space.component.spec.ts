@@ -1,3 +1,4 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameService } from '../../game.service';
 import { InterfaceService } from '../../interface.service';
@@ -14,6 +15,7 @@ describe('SpaceComponent', () => {
 
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
+			imports: [ HttpClientTestingModule ],
 			providers: [ InterfaceService, GameService ],
 			declarations: [ SpaceComponent, PieceComponent ]
 		})
@@ -30,7 +32,7 @@ describe('SpaceComponent', () => {
 			color: 'red',
 			id: 0,
 			name: 'Red'
-		}, game.rules);
+		}, game);
 
 		component.space = new Space({
 			player

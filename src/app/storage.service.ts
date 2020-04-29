@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Card } from './game/card.model';
 import { FlatGameLogItem, GameLogItem } from './game/game-log-item.interface';
-import { GameService } from './game/game.service';
+import { GameInterface, GameRules, GameService } from './game/game.service';
 import { FlatPiece, Piece } from './game/piece.model';
 import { FlatPlayer, Player } from './game/player.model';
 import { FlatSpace, Space, SpaceOptions } from './game/space.model';
@@ -21,11 +21,13 @@ export interface GameInfo {
 }
 
 interface FlatGame {
-	id: number;
+	gameId: number;
 	// name: string; // not implemented
 	turn: number;
 	round: number;
 	hasDiscarded: boolean;
+	rules: GameRules;
+
 	cards: Card[]; // Card is already a 'flat' type
 
 	flatPlayers: FlatPlayer[];
@@ -167,12 +169,13 @@ export class StorageService {
 		const { players, pieces, spaces, deck, discard } = game;
 
 		const propertiesToSaveDirectly = [
-			'id',
+			'gameId',
 			'rules',
 			'turn',
 			'round',
 			'hasDiscarded',
-			'cards'
+			'cards',
+			'rules'
 		];
 
 		const flatGame: Partial<FlatGame> = {};
@@ -197,15 +200,7 @@ export class StorageService {
 			return flatSpace;
 		});
 
-		flatGame.flatPlayers = players.map(player => {
-			const { goal, hand, home, pieces: playerPieces, spaces: playerSpaces, ...flatPlayer }: Player & FlatPlayer = player;
-			flatPlayer.goalSpaceIds = goal.map(space => space.id);
-			flatPlayer.handCardIds = hand.map(card => card.id);
-			flatPlayer.homePieceIds = home.map(piece => piece.id);
-			flatPlayer.pieceIds = playerPieces.map(piece => piece.id);
-			flatPlayer.spaceIds = playerSpaces.map(space => space.id);
-			return flatPlayer;
-		});
+		flatGame.flatPlayers = players.map(player => player.flatten());
 
 		flatGame.deckCardIds = deck.map(card => card.id);
 		flatGame.discardCardIds = discard.map(card => card.id);
@@ -214,10 +209,17 @@ export class StorageService {
 	}
 
 	hydrateGame(flatGame: FlatGame) {
-		const { flatPlayers, flatSpaces, flatPieces, deckCardIds = [], discardCardIds = [], ...newGame }: FlatGame & Partial<any> = flatGame;
+		const {
+			flatPlayers,
+			flatSpaces,
+			flatPieces,
+			deckCardIds = [],
+			discardCardIds = [],
+			...newGame
+		}: FlatGame & GameInterface = flatGame;
 
 		newGame.cards = newGame.cards.map(card => new Card(card));
-		newGame.players = flatPlayers.map(player => new Player(player, newGame.rules));
+		newGame.players = flatPlayers.map(flatPlayer => new Player(flatPlayer, newGame));
 		newGame.pieces = flatPieces.map(piece => new Piece(piece));
 		newGame.spaces = flatSpaces.map(flatSpace => {
 			const { playerId, pieceId, ...spaceOptions }: FlatSpace & Partial<SpaceOptions> = flatSpace;
@@ -237,26 +239,9 @@ export class StorageService {
 		});
 
 		newGame.players.forEach((player, playerIndex) => {
-			const { handCardIds = [], pieceIds = [], homePieceIds = []} = flatPlayers[playerIndex];
-			player.spaces = newGame.spaces.filter((space: Space) => {
-				return space.player === player && space.isGoal === false;
-			});
-			player.goal = newGame.spaces.filter((space: Space) => {
-				return space.player === player && space.isGoal === true;
-			});
-			player.hand = handCardIds.map(id => {
-				return newGame.cards.find(card => card.id === id);
-			});
-			player.pieces = pieceIds.map(id => {
-				return newGame.pieces.find(piece => piece.id === id);
-			});
-			player.home = homePieceIds.map(id => {
-				return player.pieces.find(piece => piece.id === id);
-			});
+			player.hydrate(flatPlayers[playerIndex], newGame);
 		});
 
-		// hopefully in the right order
-		newGame.boardSpaces = newGame.spaces.filter(space => !space.isGoal);
 		newGame.deck = deckCardIds.map(id => {
 			return newGame.cards.find(card => card.id === id);
 		});

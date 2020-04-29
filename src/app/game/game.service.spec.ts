@@ -30,8 +30,58 @@ describe('Game Service - Basics', () => {
 			boardSize: 6,
 			numberOfPlayers: 6
 		});
+		expect(game.players.length).toEqual(6);
+	});
+
+	it ('should set up swap players correctly in a 4 player game', () => {
 		game.newGame();
-	})
+		const { players } = game;
+
+		expect(players[0].swapPlayer).toBe(players[2]);
+		expect(players[1].swapPlayer).toBe(players[3]);
+		expect(players[2].swapPlayer).toBe(players[0]);
+		expect(players[3].swapPlayer).toBe(players[1]);
+	});
+
+	it ('should set up swap players correctly in a 6 player game', () => {
+		game.newGame({
+			boardSize: 6,
+			numberOfPlayers: 6
+		});
+
+		const { players } = game;
+
+		expect(players[0].swapPlayer).toBe(players[3]);
+		expect(players[1].swapPlayer).toBe(players[4]);
+		expect(players[2].swapPlayer).toBe(players[5]);
+		expect(players[3].swapPlayer).toBe(players[0]);
+		expect(players[4].swapPlayer).toBe(players[1]);
+		expect(players[5].swapPlayer).toBe(players[2]);
+	});
+
+	it ('should set up swap players correctly in an odd number of players game', () => {
+		game.newGame({
+			boardSize: 6,
+			numberOfPlayers: 5
+		});
+
+		const { players } = game;
+
+		expect(players[0].swapPlayer).toBe(players[1]);
+		expect(players[1].swapPlayer).toBe(players[2]);
+		expect(players[2].swapPlayer).toBe(players[3]);
+		expect(players[3].swapPlayer).toBe(players[4]);
+		expect(players[4].swapPlayer).toBe(players[0]);
+	});
+
+	it('should have selected swaps for bots on new game', () => {
+		game.newGame();
+		game.executeAdvanceRound();
+
+		expect(game.turn).toEqual(0);
+		expect(game.activePlayer).toBeFalsy();
+		expect(game.players[1].swapCard).toBeTruthy();
+	});
 });
 
 describe('Game Service - Cards / Movement', () => {

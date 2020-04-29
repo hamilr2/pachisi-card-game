@@ -34,7 +34,7 @@ This project offers solo play vs bots and online play with other humans and/or b
 * ~~ Send to Home (possibly even own piece) ~~
 * ~~ In-goal movement (no -4?) ~~
 * ~~ No jumping over pieces in home ~~
-* Pre-round card swap
+* ~~ Pre-round card swap ~~
 * Victory condition detection
 * Rotate starting player clockwise each round
 

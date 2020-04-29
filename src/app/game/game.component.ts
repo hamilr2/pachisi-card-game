@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { GameService } from './game.service';
-import { InterfaceService } from './interface.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { LiveService } from '../live.service';
 import { GameLogItem } from './game-log-item.interface';
+import { GameService } from './game.service';
+import { InterfaceService } from './interface.service';
 
 @Component({
 	selector: 'app-game',
@@ -37,7 +37,9 @@ export class GameComponent implements OnInit, OnDestroy {
 			this.interfaceService.setGame(this.game, this.playerId);
 		});
 		this.game.update.subscribe(() => {
-			if (this.game.activePlayer === this.game.player) {
+			if (!this.game.activePlayer) {
+				this.status = 'Swap Round';
+			} else if (this.game.activePlayer === this.game.player) {
 				this.status = 'It is your turn';
 			} else {
 				this.status = `${this.game.activePlayer.name} is playing`;
@@ -68,7 +70,13 @@ export class GameComponent implements OnInit, OnDestroy {
 
 	buildUserAction() {
 		let action = '';
-		if (this.game.activePlayer !== this.game.player) {
+		if (this.game.turn === 0) {
+			if (this.game.player.swapCard) {
+				action = 'Waiting for other players to choose their card to swap';
+			} else {
+				action = `Select a card to swap with ${this.game.player.swapPlayer.name}`;
+			}
+		} else if (this.game.activePlayer !== this.game.player) {
 			action = 'Await your turn';
 		} else {
 			if (this.interfaceService.selectingPiece === false && this.interfaceService.selectingSpace === false) {

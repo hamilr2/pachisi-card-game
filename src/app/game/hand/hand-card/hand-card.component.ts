@@ -39,11 +39,6 @@ export class HandCardComponent implements OnInit {
 		this.interfaceService.reset();
 	}
 
-	onClickPlay(e: Event) {
-		e.stopPropagation();
-		this.interfaceService.attemptPlayCard(this.card, this.card.actions[0]);
-	}
-
 	onClickDiscard(e: Event) {
 		e.stopPropagation();
 		this.game.discardCard(this.interfaceService.player, this.card);
@@ -52,6 +47,11 @@ export class HandCardComponent implements OnInit {
 	onClickAction(action: CardAction, e: Event) {
 		e.stopPropagation();
 		this.interfaceService.attemptPlayCard(this.card, action);
+	}
+
+	onSwapClick(e: Event) {
+		e.stopPropagation();
+		this.interfaceService.selectSwap(this.card);
 	}
 
 }

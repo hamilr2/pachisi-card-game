@@ -34,7 +34,7 @@ describe('HomeComponent', () => {
 			color: 'red',
 			id: 0,
 			name: 'Red'
-		}, game.rules);
+		}, game);
 
 		fixture.detectChanges();
 	});

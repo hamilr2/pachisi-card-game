@@ -1,15 +1,16 @@
-import { Player } from './player.model';
 import { Card, CardAction } from './card.model';
-import { Move, FlatMove } from './interfaces';
+import { FlatMove, Move } from './interfaces';
+import { Player } from './player.model';
 
 export const GameLogActions = {
+	ADVANCE_ROUND: 'advanceRound',
+	DEAL: 'deal',
 	DISCARD: 'discard',
 	DISCARD_DRAW: 'discardAndDraw',
+	JOIN: 'join',
 	PLAY: 'play',
 	SHUFFLE: 'shuffle',
-	JOIN: 'join',
-	DEAL: 'deal',
-	ADVANCE_ROUND: 'advanceRound'
+	SWAP: 'swap'
 };
 
 export interface GameLogItem {

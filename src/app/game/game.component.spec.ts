@@ -9,6 +9,8 @@ describe('GameComponent', () => {
 	let component: GameComponent;
 	let fixture: ComponentFixture<GameComponent>;
 
+	let game: GameService;
+
 	beforeEach(async(() => {
 		TestBed.configureTestingModule({
 			imports: [ HttpClientTestingModule, RouterTestingModule ],
@@ -21,10 +23,26 @@ describe('GameComponent', () => {
 	beforeEach(() => {
 		fixture = TestBed.createComponent(GameComponent);
 		component = fixture.componentInstance;
+
+		game = TestBed.inject(GameService);
+		game.newGame();
+		game.executeAdvanceRound();
 		fixture.detectChanges();
 	});
 
 	it('should create', () => {
 		expect(component).toBeTruthy();
 	});
+
+	// Need to set up the testing router for further tests here probably
+
+	// fit('should show swap message in user-actions', () => {
+	// 	const element = fixture.nativeElement;
+	// 	console.log(element.innerHTML);
+	// 	const span: Element = element.querySelector('.user-action span');
+
+	// 	expect(span.innerHTML).toContain('Select a card to swap with');
+
+	// });
+
 });

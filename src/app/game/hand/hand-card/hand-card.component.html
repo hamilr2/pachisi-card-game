@@ -16,17 +16,20 @@
 			(click)="onClickCancel($event)"
 			class="cardButton redButton"
 		>Cancel</button>
-
 		<button
-			*ngIf="playable && card.actions.length == 1"
-			(click)="onClickAction(card.actions[0], $event)"
-			[disabled]="isPlayDisabled()"
-		>Play</button>
-		<div *ngIf="card.actions.length > 1" class="play-actions">
+			*ngIf="interfaceService.selectingSwap"
+			(click)="onSwapClick($event)"
+		>Swap</button>
+
+		<div
+			class="play-actions"
+			*ngIf="!interfaceService.selectingSwap"
+		>
 			<button
 				*ngFor="let cardAction of card.actions"
 				(click)="onClickAction(cardAction, $event)"
-			>{{ cardAction.text}}
+				[disabled]="isPlayDisabled()"
+			>{{ cardAction.text || 'Play'}}
 			</button>
 		</div>
 	</div>

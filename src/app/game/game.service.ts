@@ -35,9 +35,31 @@ const RuleDefaults: GameRules = {
 	numberOfPieces: 4
 };
 
+export interface GameInterface {
+	gameId: number;
+	rules: GameRules;
+	cards?: Card[];
+	pieces?: Piece[];
+	spaces?: Space[]; // includes main board + goal, but not home "spaces"
+	players?: Player[];
+
+	// variable game items
+	player?: Player;
+	deck?: Card[];
+	discard?: Card[];
+
+	// State
+	round?: number;
+	turn?: number;
+	activePlayer?: Player;
+	hasDiscarded?: boolean;
+}
+
+export type GameLike = GameInterface | GameService;
+
 @Injectable()
 
-export class GameService {
+export class GameService implements GameInterface {
 
 	gameId: number;
 	location: string;
@@ -129,8 +151,10 @@ export class GameService {
 	executeAdvanceRound(): void {
 		this.round++;
 		this.hasDiscarded = false;
-		this.turn = 1; // 0 for swapping in the future
+		this.turn = 0;
+		this.setActivePlayer();
 		this.deal();
+		this.selectSwapsForBots();
 		this.save();
 		this.sendUpdate(['advanceTurn', 'advanceRound']);
 	}
@@ -222,7 +246,11 @@ export class GameService {
 	}
 
 	setActivePlayer(): void {
-		this.activePlayer = this.players[(this.turn - 1) % this.players.length];
+		if (this.turn === 0) {
+			this.activePlayer = null;
+		} else {
+			this.activePlayer = this.players[(this.turn - 1) % this.players.length];
+		}
 	}
 
 	loadGame(id: number, location: string, localPlayerId: number): void {
@@ -263,8 +291,14 @@ export class GameService {
 				});
 			}
 
-			if (this.activePlayer.onlineStatus === 'bot') {
-				this.takeTurnForPlayer(this.activePlayer);
+			if (this.round === 0) {
+				this.advanceRound();
+			} else {
+				if (this.turn === 0) {
+					this.selectSwapsForBots();
+				} else if (this.activePlayer.onlineStatus === 'bot') {
+					this.takeTurnForPlayer(this.activePlayer);
+				}
 			}
 
 			this.isLoaded = true;
@@ -279,8 +313,8 @@ export class GameService {
 
 		this.discard = [];
 		this.hasDiscarded = false;
-		this.round = 1;
-		this.turn = 1;
+		this.round = 0;
+		this.turn = 0;
 
 		this.buildPlayers();
 		this.player = this.players[0];
@@ -298,7 +332,8 @@ export class GameService {
 		this.buildDeck();
 		this.cards = [...this.deck];
 		this.deck = DogUtil.shuffle(this.deck);
-		this.deal();
+
+		this.advanceRound();
 	}
 
 	save(): void {
@@ -710,6 +745,39 @@ export class GameService {
 		this.executeMove(piece, endSpace, startSpace);
 	}
 
+	selectCardForSwap(player: Player, card: Card) {
+		player.swapCard = card;
+		if (this.location === 'remote') {
+			this.sendAction({
+				action: GameLogActions.SWAP,
+				card,
+				player
+			});
+		} else {
+			if (this.players.every(({ swapCard }) => !!swapCard)) {
+				this.executeSwap();
+			}
+		}
+	}
+
+	selectSwapsForBots() {
+		this.players.filter(player => player.onlineStatus === 'bot').forEach(player => {
+			// Todo: improve swap AI to either discard worst card or help out teammate
+			// perhaps stagger these with timeouts for some "realism"
+			this.selectCardForSwap(player, player.hand[0]);
+		});
+	}
+
+	executeSwap() {
+		this.players.forEach(player => {
+			player.hand = player.hand.filter(card => card !== player.swapCard);
+			player.swapPlayer.hand.push(player.swapCard);
+			player.swapCard = null;
+		});
+
+		this.advanceTurn();
+	}
+
 	private executeMove(piece, startSpace, endSpace): void {
 		if (!endSpace) {
 			piece.player.home.push(piece);
@@ -776,17 +844,31 @@ export class GameService {
 		}
 	}
 
-	buildPlayers(numberOfPlayers: number = 4): void {
+	buildPlayers(): void {
 		this.players = [];
 		const colors = ['red', 'green', 'blue', 'yellow', 'orange', 'purple'];
 		const names = ['Red', 'Green', 'Blue', 'Yellow', 'Orange', 'Purple'];
-		for (let i = 0; i < numberOfPlayers; i++) {
+		for (let i = 0; i < this.rules.numberOfPlayers; i++) {
 			this.players.push(new Player({
 				color: colors[i],
 				id: i,
 				name: names[i]
-			}, this.rules));
+			}, this));
 		}
+
+		// Even number of players -- swap across
+		if (this.rules.numberOfPlayers % 2 === 0) {
+			this.players.forEach((player, index) => {
+				const partnerIndex = (index + (this.rules.numberOfPlayers / 2)) % this.rules.numberOfPlayers;
+				player.swapPlayer = this.players[partnerIndex];
+			});
+		} else {
+			this.players.forEach((player, index) => {
+				const swapIndex = (index + 1) % this.rules.numberOfPlayers;
+				player.swapPlayer = this.players[swapIndex];
+			});
+		}
+
 	}
 
 	buildDeck(): void {
@@ -843,7 +925,7 @@ export class GameService {
 			console.error('Message arrived before game was loaded', flatItem);
 			return;
 		}
-		const { PLAY, DISCARD, DISCARD_DRAW, JOIN, SHUFFLE, ADVANCE_ROUND } = GameLogActions;
+		const { PLAY, DISCARD, DISCARD_DRAW, JOIN, SHUFFLE, ADVANCE_ROUND, SWAP } = GameLogActions;
 		const item = this.hydrateGameLogItem(flatItem);
 
 		// console.log('Handle Message', item.action, item.player && item.player.name, item);
@@ -869,6 +951,12 @@ export class GameService {
 				this.updates.push('deck', 'discard');
 			}
 			this.executeAdvanceRound();
+		} else if (item.action === SWAP) {
+			item.player.swapCard = item.card;
+
+			if (this.players.every(({ swapCard }) => !!swapCard)) {
+				this.executeSwap();
+			}
 		}
 	}
 

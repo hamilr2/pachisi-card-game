@@ -1,8 +1,9 @@
-import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-import { Card } from '../card.model';
-import { Player } from '../player.model';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { Card } from '../card.model';
 import { GameService } from '../game.service';
+import { InterfaceService } from '../interface.service';
+import { Player } from '../player.model';
 
 @Component({
 	selector: 'app-hand',
@@ -16,7 +17,8 @@ export class HandComponent implements OnInit, OnDestroy {
 	builtHand = [];
 
 	constructor(
-		private game: GameService
+		private game: GameService,
+		private interfaceService: InterfaceService
 	) { }
 
 	onCardActiveChange({card, active}: {card: Card, active: boolean}): void {
@@ -31,7 +33,7 @@ export class HandComponent implements OnInit, OnDestroy {
 
 	buildHand(): void {
 
-		const { player } = this.game;
+		const { player, turn } = this.game;
 		const { hand: cards = [] } = player;
 
 		const usableCards = this.game.getUsableCards(player);
@@ -45,13 +47,18 @@ export class HandComponent implements OnInit, OnDestroy {
 		const startingTop = (cards.length - 1) / 2 * VERTICAL_SPACING * -1;
 
 		this.builtHand = cards.map((card: Card, index) => {
+			let playable = !!usableCards.find(usableCard => usableCard.card === card);
+			if (this.game.turn === 0) {
+				playable = this.interfaceService.selectingSwap;
+			}
+
 			return {
 				card,
 				rotation: startingRotation + index * ROTATION_INTERVAL,
 				left: startingLeft + index * HORIZONTAL_SPACING,
 				top: startingTop + index * VERTICAL_SPACING,
 				active: false,
-				playable: !!usableCards.find(usableCard => usableCard.card === card)
+				playable
 			};
 		});
 	}
