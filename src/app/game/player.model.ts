@@ -16,8 +16,8 @@ interface PlayerOptions {
 const COPY_PROPS = ['color', 'id', 'name', 'onlineStatus', 'host'];
 
 export interface FlatPlayer {
-	color: string;
 	id: number;
+	color: string;
 	name: string;
 	onlineStatus: string;
 	host: boolean;

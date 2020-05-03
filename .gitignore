@@ -3,7 +3,8 @@
 firebase.json
 .firebase
 
-# See http://help.github.com/ignore-files/ for more about ignoring files.
+# disabled until we have some firebase functions
+/functions
 
 # Environments
 /src/environments/environment.ts

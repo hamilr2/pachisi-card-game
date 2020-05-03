@@ -1,0 +1,177 @@
+{
+	"rules": {
+		"gameInfos": {
+			".read": true,
+			".write": true,
+			"$game_id": {
+				"id": { ".validate": "newData.isNumber()" },
+				"name": { ".validate": "newData.isString() && newData.val().length <= 100" },
+				"turn": { ".validate": "newData.isNumber()" },
+				"round": { ".validate": "newData.isNumber()" },
+				"lastUpdate": { ".validate": "newData.isNumber()" },
+				"$others": { ".validate": false }
+			}
+		},
+		"games": {
+			"$game_id": {
+				".read": true,
+				".write": true,
+				"gameId": { ".validate": "newData.isNumber()" },
+				"rules": {
+					"useTeams": { ".validate": "newData.isBoolean()" },
+					"boardSize": { ".validate": "newData.isNumber()" },
+					"numberOfPlayers": { ".validate": "newData.isNumber()" },
+					"useDiscardRule": { ".validate": "newData.isBoolean()" },
+					"playerOrderAntiClockwise": { ".validate": "newData.isBoolean()" },
+					"numberOfPieces": { ".validate": "newData.isNumber()" },
+					"$others": { ".validate": false }
+				},
+				"turn": { ".validate": "newData.isNumber()" },
+				"round": { ".validate": "newData.isNumber()" },
+				"hasDiscarded": { ".validate": "newData.isBoolean()" },
+				"winnerId": { ".validate": "newData.isNumber()" },
+				"continuePlaying": { ".validate": "newData.isBoolean()" },
+
+				"cards": {
+					"$index": {
+						"id": { ".validate": "newData.isNumber()" },
+						"basic": { ".validate": "newData.isBoolean()" },
+						"color": { ".validate": "newData.isString() && newData.val().length <= 20" },
+						"symbol": { ".validate": "newData.isString() && newData.val().length <= 5" },
+						"quantity": { ".validate": "newData.isNumber()" },
+						"actions": {
+							"$index": {
+								"value": { ".validate": "newData.isNumber()" },
+								"startable": { ".validate": "newData.isBoolean()" },
+								"special": { ".validate": "newData.isString() && newData.val().length <= 10" },
+								"text": { ".validate": "newData.isString() && newData.val().length <= 20" },
+								"values": {
+									"$value_index": {
+										".validate": "newData.isNumber()",
+										"$others": { ".validate": false }
+									}
+								},
+								"$others": { ".validate": false }
+							}
+						},
+						"$others": { ".validate": false }
+					}
+				},
+
+				"flatPlayers": {
+					"$player_index": {
+						"id": { ".validate": "newData.isNumber()" },
+						"color": { ".validate": "newData.isString() && newData.val().length <= 20"},
+						"name": { ".validate": "newData.isString() && newData.val().length <= 30"},
+						"onlineStatus": { ".validate": "newData.isString() && newData.val().length <= 20"},
+						"host": { ".validate": "newData.isBoolean()" },
+
+						"goalSpaceIds": {
+							"$index": {
+								".validate": "newData.isNumber()"
+							}
+						},
+						"handCardIds": {
+							"$index": {
+								".validate": "newData.isNumber()"
+							}
+						},
+						"homePieceIds": {
+							"$index": {
+								".validate": "newData.isNumber()"
+							}
+						},
+						"pieceIds": {
+							"$index": {
+								".validate": "newData.isNumber()"
+							}
+						},
+						"spaceIds": {
+							"$index": {
+								".validate": "newData.isNumber()"
+							}
+						},
+
+						"swapPlayerId": { ".validate": "newData.isNumber()" },
+						"swapCardId": { ".validate": "newData.isNumber() || newData.val() === null" },
+
+						"$others": { ".validate": false }
+					}
+				},
+
+				"flatSpaces": {
+					"$index": {
+						"id": { ".validate": "newData.isNumber()" },
+						"isGoal": { ".validate": "newData.isBoolean()" },
+						"isStart": { ".validate": "newData.isBoolean()" },
+						"pieceId": { ".validate": "newData.isNumber() || newData.val() === null" },
+						"playerId": { ".validate": "newData.isNumber()" },
+						"$others": { ".validate": false }
+					}
+				},
+
+				"flatPieces": {
+					"$index": {
+						"id": { ".validate": "newData.isNumber()" },
+						"color": { ".validate": "newData.isString() && newData.val().length <= 20" },
+						"playerId": { ".validate": "newData.isNumber()" },
+						"spaceId": { ".validate": "newData.isNumber() || newData.val() === null" },
+						"$others": { ".validate": false }
+					}
+				},
+
+				"deckCardIds": {
+					"$index": {
+						".validate": "newData.isNumber()",
+						"$others": { ".validate": false }
+					}
+				},
+				"discardCardIds": {
+					"$index": {
+						".validate": "newData.isNumber()",
+						"$others": { ".validate": false }
+					}
+				},
+
+				"gameLog": {
+					"$log_id": {
+						"playerId": { ".validate": "newData.isNumber()" },
+						"action": { ".validate": "newData.isString() && newData.val().length <= 20" },
+						"cardAction": {
+							"$index": {
+								"value": { ".validate": "newData.isNumber()" },
+								"startable": { ".validate": "newData.isBoolean()" },
+								"special": { ".validate": "newData.isString() && newData.val().length <= 10" },
+								"text": { ".validate": "newData.isString() && newData.val().length <= 20" },
+								"values": {
+									"$value_index": {
+										".validate": "newData.isNumber()",
+										"$others": { ".validate": false }
+									}
+								},
+								"$others": { ".validate": false }
+							}
+						},
+						"cardId": { ".validate": "newData.isNumber()" },
+						"moveSet": {
+							"$index": {
+								"pieceId": { ".validate": "newData.isNumber()" },
+								"spaceId": { ".validate": "newData.isNumber()" },
+								"$others": { ".validate": false }
+							}
+						},
+						"cardIds": {
+							"$index": {
+								".validate": "newData.isNumber()"
+							}
+						},
+						"$others": { ".validate": false }
+					}
+				},
+
+				"$others": { ".validate": false }
+			}
+		},
+		"$others": { ".validate": false }
+	}
+}

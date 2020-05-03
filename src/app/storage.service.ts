@@ -23,10 +23,13 @@ export interface GameInfo {
 interface FlatGame {
 	gameId: number;
 	// name: string; // not implemented
+	rules: GameRules;
+
 	turn: number;
 	round: number;
 	hasDiscarded: boolean;
-	rules: GameRules;
+	winnerId: number;
+	continuePlaying: boolean;
 
 	cards: Card[]; // Card is already a 'flat' type
 
