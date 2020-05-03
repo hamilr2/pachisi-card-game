@@ -85,6 +85,8 @@ export class GameService implements GameInterface {
 	turn: number;
 	activePlayer: Player;
 	hasDiscarded: boolean;
+	winner: Player;
+	continuePlaying = false;
 
 	// utilities
 	recursions: number;
@@ -160,6 +162,10 @@ export class GameService implements GameInterface {
 	}
 
 	advanceTurn(): void {
+		this.checkWinCondition();
+		if (this.winner && !this.continuePlaying) {
+			return;
+		}
 		this.turn++;
 		this.setActivePlayer();
 		if (this.activePlayer.hand.length === 0) {
@@ -174,6 +180,10 @@ export class GameService implements GameInterface {
 		if (this.activePlayer.onlineStatus === 'bot') {
 			this.takeTurnForPlayer(this.activePlayer);
 		}
+	}
+
+	checkWinCondition(): void {
+		this.winner = this.players.find(player => player.goal.every(space => !!space.piece));
 	}
 
 	getUsableCards(player): UsableCard[] {

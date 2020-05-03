@@ -17,12 +17,13 @@ This project offers solo play vs bots and online play with other humans and/or b
 * Navigate to http://localhost:4200.
 
 ## Further Notes
-* The online version of this game makes use (abuses?) Firebase's Real-time Database. Because the game does not implement auth, it required full read/write access to a Firebase instance, which is a security issue. Online play therefore should not be enabled in a production enironment. Ideally / Eventually the server code will be moved to either a dedicated Node server, or Firebase functions.
+* The online version of this game currently uses Firebase's Real-time Database. Permissions are not in place -- only input validation is performed. This means anyone can change anyone's game, or see other players cards while games are in progress. Eventually, this could/should be moved to either Firebase Custom Functions or a dedicated Node.js server.
 * The game can be easily deployed to Firebase static hosting
 * The core game logic is under test; component tests are stubbed out. Tests can be run with `ng test`.
 
-
 ## Todo List
+
+**Bold** items are intended for release 0.1.
 
 #### Cards
 * ~~ Burning Seven ~~
@@ -35,8 +36,8 @@ This project offers solo play vs bots and online play with other humans and/or b
 * ~~ In-goal movement (no -4?) ~~
 * ~~ No jumping over pieces in home ~~
 * ~~ Pre-round card swap ~~
-* Victory condition detection
-* Rotate starting player clockwise each round
+* ~~ Victory condition detection ~~
+* **Rotate starting player clockwise each round**
 
 #### Game Variants
 * If cannot make move, sit out
@@ -51,17 +52,17 @@ This project offers solo play vs bots and online play with other humans and/or b
 * Card Swap
 
 #### Remote Logic
-* Select player when joining
+* **Select player when joining**
 * Updating of online status in game and in lobbies
 * Auto-bot
 * Become Host
 
 #### Interface
-* Edit player name
+* **Edit player name**
 * Game options on creation (deck, players, rules)
 * Make player bot / take turn for player
-* Home screen game deletion
-* Expandable Activity Log (and persistence)
+* **Home screen game deletion**
+* **Expandable Activity Log (and persistence)**
 
 #### Graphics
 * Card Button re-work

@@ -70,7 +70,9 @@ export class GameComponent implements OnInit, OnDestroy {
 
 	buildUserAction() {
 		let action = '';
-		if (this.game.turn === 0) {
+		if (this.game.winner) {
+			action = `${this.game.winner.name} won the game!`;
+		} else if (this.game.turn === 0) {
 			if (this.game.player.swapCard) {
 				action = 'Waiting for other players to choose their card to swap';
 			} else {

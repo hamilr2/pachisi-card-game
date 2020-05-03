@@ -647,6 +647,17 @@ describe('Game Service - Cards / Movement', () => {
 	// Util
 	//
 
+	it('should set the winner if win condition is met', () => {
+		assignPieceToSpace(players[0].pieces[0], players[0].goal[0]);
+		assignPieceToSpace(players[0].pieces[1], players[0].goal[1]);
+		assignPieceToSpace(players[0].pieces[2], players[0].goal[2]);
+		assignPieceToSpace(players[0].pieces[3], players[0].goal[3]);
+
+		game.advanceTurn();
+
+		expect(game.winner).toBe(players[0]);
+	});
+
 	it('should properly calculate distance between spaces', () => {
 		expect(game.getDistanceBetweenSpaces(boardSpaces[0], boardSpaces[5])).toEqual(5);
 		expect(game.getDistanceBetweenSpaces(boardSpaces[63], boardSpaces[1])).toEqual(2);

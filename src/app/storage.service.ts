@@ -169,7 +169,7 @@ export class StorageService {
 	}
 
 	flattenGame(game: GameService): FlatGame {
-		const { players, pieces, spaces, deck, discard } = game;
+		const { players, pieces, spaces, deck, discard, winner } = game;
 
 		const propertiesToSaveDirectly = [
 			'gameId',
@@ -178,7 +178,8 @@ export class StorageService {
 			'round',
 			'hasDiscarded',
 			'cards',
-			'rules'
+			'rules',
+			'continuePlaying'
 		];
 
 		const flatGame: Partial<FlatGame> = {};
@@ -204,6 +205,7 @@ export class StorageService {
 		});
 
 		flatGame.flatPlayers = players.map(player => player.flatten());
+		flatGame.winnerId = winner ? winner.id : undefined;
 
 		flatGame.deckCardIds = deck.map(card => card.id);
 		flatGame.discardCardIds = discard.map(card => card.id);
