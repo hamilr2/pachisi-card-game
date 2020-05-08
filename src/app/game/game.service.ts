@@ -53,6 +53,7 @@ export interface GameInterface {
 	turn?: number;
 	activePlayer?: Player;
 	hasDiscarded?: boolean;
+	turnOrder?: Player[];
 }
 
 export type GameLike = GameInterface | GameService;
@@ -87,6 +88,7 @@ export class GameService implements GameInterface {
 	hasDiscarded: boolean;
 	winner: Player;
 	continuePlaying = false;
+	turnOrder: Player[];
 
 	// utilities
 	recursions: number;
@@ -154,6 +156,9 @@ export class GameService implements GameInterface {
 		this.round++;
 		this.hasDiscarded = false;
 		this.turn = 0;
+		if (this.round !== 1) {
+			this.turnOrder.push(this.turnOrder.shift());
+		}
 		this.setActivePlayer();
 		this.deal();
 		this.selectSwapsForBots();
@@ -259,7 +264,7 @@ export class GameService implements GameInterface {
 		if (this.turn === 0) {
 			this.activePlayer = null;
 		} else {
-			this.activePlayer = this.players[(this.turn - 1) % this.players.length];
+			this.activePlayer = this.turnOrder[(this.turn - 1) % this.rules.numberOfPlayers];
 		}
 	}
 
@@ -342,6 +347,8 @@ export class GameService implements GameInterface {
 		this.buildDeck();
 		this.cards = [...this.deck];
 		this.deck = DogUtil.shuffle(this.deck);
+
+		this.turnOrder = [...this.players];
 
 		this.advanceRound();
 	}

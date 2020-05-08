@@ -82,6 +82,36 @@ describe('Game Service - Basics', () => {
 		expect(game.activePlayer).toBeFalsy();
 		expect(game.players[1].swapCard).toBeTruthy();
 	});
+
+
+	it('should move forward to the first turn on selected card swap', () => {
+		game.newGame();
+		const { players } = game;
+		game.executeAdvanceRound();
+
+		expect(game.turn).toEqual(0);
+		expect(game.activePlayer).toBeNull();
+
+		game.selectCardForSwap(players[0], players[0].hand[0]);
+
+		expect(game.turn).toEqual(1);
+		expect(game.activePlayer).toBe(players[0]);
+	});
+
+	it('should start with the 2nd player in the 2nd round', () => {
+		game.newGame();
+		const { players } = game;
+		game.executeAdvanceRound();
+		game.executeAdvanceRound();
+
+		expect(game.round).toEqual(2);
+		expect(game.turn).toEqual(0);
+
+		game.selectCardForSwap(players[0], players[0].hand[0]);
+
+		expect(game.turn).toEqual(1);
+		expect(game.activePlayer).toBe(players[1]);
+	});
 });
 
 describe('Game Service - Cards / Movement', () => {

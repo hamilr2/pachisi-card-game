@@ -37,7 +37,7 @@ This project offers solo play vs bots and online play with other humans and/or b
 * ~~ No jumping over pieces in home ~~
 * ~~ Pre-round card swap ~~
 * ~~ Victory condition detection ~~
-* **Rotate starting player clockwise each round**
+* ~~ Rotate starting player clockwise each round ~~
 
 #### Game Variants
 * If cannot make move, sit out

@@ -30,6 +30,7 @@ interface FlatGame {
 	hasDiscarded: boolean;
 	winnerId: number;
 	continuePlaying: boolean;
+	turnOrderIds: number[];
 
 	cards: Card[]; // Card is already a 'flat' type
 
@@ -169,7 +170,7 @@ export class StorageService {
 	}
 
 	flattenGame(game: GameService): FlatGame {
-		const { players, pieces, spaces, deck, discard, winner } = game;
+		const { deck, discard, pieces, players, spaces, turnOrder, winner } = game;
 
 		const propertiesToSaveDirectly = [
 			'gameId',
@@ -210,6 +211,8 @@ export class StorageService {
 		flatGame.deckCardIds = deck.map(card => card.id);
 		flatGame.discardCardIds = discard.map(card => card.id);
 
+		flatGame.turnOrderIds = turnOrder.map(player => player.id);
+
 		return flatGame as FlatGame;
 	}
 
@@ -220,6 +223,7 @@ export class StorageService {
 			flatPieces,
 			deckCardIds = [],
 			discardCardIds = [],
+			turnOrderIds = [],
 			...newGame
 		}: FlatGame & GameInterface = flatGame;
 
@@ -253,6 +257,10 @@ export class StorageService {
 		newGame.discard = discardCardIds.map(id => {
 			return newGame.cards.find(card => card.id === id);
 		});
+
+		newGame.turnOrder = turnOrderIds.map(playerId => {
+			return newGame.players.find(player => player.id === playerId);
+		})
 
 		return newGame;
 	}
