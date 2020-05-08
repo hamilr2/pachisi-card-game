@@ -109,7 +109,7 @@ export class Player {
 	}
 
 	mapper(sourceIds: number[], searchTarget: any[]) {
-		return sourceIds.map(id => searchTarget.find(item => item.id === id));
+		return sourceIds.map(id => searchTarget.find(item => item.id === id) || null);
 	}
 
 	flatten(): FlatPlayer {

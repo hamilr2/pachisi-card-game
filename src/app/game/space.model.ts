@@ -23,7 +23,7 @@ export class Space {
 	isGoal = false;
 	isStart = false;
 	player: Player;
-	piece: Piece;
+	piece: Piece = null;
 	id: number;
 
 	constructor(options: SpaceOptions) {

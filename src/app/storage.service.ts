@@ -216,7 +216,7 @@ export class StorageService {
 		return flatGame as FlatGame;
 	}
 
-	hydrateGame(flatGame: FlatGame) {
+	hydrateGame(flatGame: FlatGame): GameInterface {
 		const {
 			flatPlayers,
 			flatSpaces,
@@ -224,27 +224,26 @@ export class StorageService {
 			deckCardIds = [],
 			discardCardIds = [],
 			turnOrderIds = [],
+			winnerId,
 			...newGame
 		}: FlatGame & GameInterface = flatGame;
 
 		newGame.cards = newGame.cards.map(card => new Card(card));
-		newGame.players = flatPlayers.map(flatPlayer => new Player(flatPlayer, newGame));
-		newGame.pieces = flatPieces.map(piece => new Piece(piece));
+		newGame.players = flatPlayers.map(flatPlayer => new Player({ flatPlayer }, newGame));
+		newGame.pieces = flatPieces.map(flatPiece => new Piece({ flatPiece }));
 		newGame.spaces = flatSpaces.map(flatSpace => {
 			const { playerId, pieceId, ...spaceOptions }: FlatSpace & Partial<SpaceOptions> = flatSpace;
 			return new Space({
 				...spaceOptions,
 				player: newGame.players.find(player => player.id === playerId),
-				piece: newGame.pieces.find(piece => piece.id === pieceId)
+				piece: newGame.pieces.find(piece => piece.id === pieceId) || null
 			});
 		});
 
 		// Re-process pieces, players
 
 		newGame.pieces.forEach((piece, pieceIndex) => {
-			const { spaceId, playerId } = flatPieces[pieceIndex];
-			piece.space = !isNaN(Number(spaceId)) ? newGame.spaces.find(space => space.id === spaceId) : null;
-			piece.player = newGame.players.find(player => player.id === playerId);
+			piece.hydrate(flatPieces[pieceIndex], newGame);
 		});
 
 		newGame.players.forEach((player, playerIndex) => {
@@ -260,7 +259,9 @@ export class StorageService {
 
 		newGame.turnOrder = turnOrderIds.map(playerId => {
 			return newGame.players.find(player => player.id === playerId);
-		})
+		});
+
+		newGame.winner = newGame.players.find(player => player.id === winnerId) || null;
 
 		return newGame;
 	}

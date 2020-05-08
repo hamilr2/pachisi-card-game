@@ -54,6 +54,7 @@ export interface GameInterface {
 	activePlayer?: Player;
 	hasDiscarded?: boolean;
 	turnOrder?: Player[];
+	winner?: Player;
 }
 
 export type GameLike = GameInterface | GameService;
@@ -86,7 +87,7 @@ export class GameService implements GameInterface {
 	turn: number;
 	activePlayer: Player;
 	hasDiscarded: boolean;
-	winner: Player;
+	winner: Player = null;
 	continuePlaying = false;
 	turnOrder: Player[];
 
