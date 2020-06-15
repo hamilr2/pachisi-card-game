@@ -26,18 +26,18 @@ This project offers solo play vs bots and online play with other humans and/or b
 **Bold** items are intended for release 0.1.
 
 #### Cards
-* ~~ Burning Seven ~~
-* ~~ Swap ~~
-* ~~ Joker -- selection of Burning Seven / Swap ~~
+* ~~Burning Seven~~
+* ~~Swap~~
+* ~~Joker -- selection of Burning Seven / Swap~~
 
 #### Game Logic
-* ~~ No passing other home players ~~
-* ~~ Send to Home (possibly even own piece) ~~
-* ~~ In-goal movement (no -4?) ~~
-* ~~ No jumping over pieces in home ~~
-* ~~ Pre-round card swap ~~
-* ~~ Victory condition detection ~~
-* ~~ Rotate starting player clockwise each round ~~
+* ~~No passing other home players~~
+* ~~Send to Home (possibly even own piece)~~
+* ~~In-goal movement (no -4?)~~
+* ~~No jumping over pieces in home~~
+* ~~Pre-round card swap~~
+* ~~Victory condition detection~~
+* ~~Rotate starting player clockwise each round~~
 
 #### Game Variants
 * If cannot make move, sit out
@@ -81,4 +81,4 @@ This project offers solo play vs bots and online play with other humans and/or b
 
 #### Development
 * More Test Cases
-* ~~ Clean up component test warnings ~~
+* ~~Clean up component test warnings~~
