@@ -4,6 +4,10 @@ An implementation of a [Cross-and-Circle](https://en.wikipedia.org/wiki/Cross_an
 
 This project offers solo play vs bots and online play with other humans and/or bots.
 
+![Dog Gameplay image (click to expand)](http://reillydotcom.com/uploads/dog_thumb.jpg)
+
+[View Full Resolution](http://reillydotcom.com/uploads/dog_full.png)
+
 ## Dependencies
 * Node / NPM
 * Firebase (optional)
